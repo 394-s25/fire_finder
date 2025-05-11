@@ -7,6 +7,9 @@ import {
 } from "react-router-dom";
 import { useAuthContext } from "./services/userProvider";
 import Home from "./pages/Home";
+import Profile from "./pages/Profile";
+import Resources from "./pages/Resources";
+import Events from './pages/Events';
 
 const App = () => {
   const PrivateRoute = ({ children }) => {
@@ -27,6 +30,9 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/resources" element={<Resources />} />
+        <Route path="/events" element={<Events />} />
       </Routes>
     </Router>
   );
