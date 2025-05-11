@@ -72,22 +72,26 @@ const Navbar = () => {
             }}
         >
             <List sx={{ width: '100%' }}>
-            <ListItem button onClick={() => handleNavigation('/profile')} sx={{ flexDirection: 'column', alignItems: 'center' }}>
+            <ListItem button onClick={() => handleNavigation('/profile')} sx={{ flexDirection: 'column', alignItems: 'center', 
+                backgroundColor: location.pathname === '/profile' ? '#FEE2E2' : 'transparent', }}>
                 <>
                 <AccountCircleIcon sx={{ color: '#DC2626'}} />
                 <ListItemText primary="Profile" sx={{ color: '#DC2626', fontSize: 10}} />
                 </>
-            </ListItem><ListItem button onClick={() => handleNavigation('/resources')} sx={{ flexDirection: 'column', alignItems: 'center' }}>
+            </ListItem><ListItem button onClick={() => handleNavigation('/resources')} sx={{ flexDirection: 'column', alignItems: 'center', 
+                backgroundColor: location.pathname === '/resources' ? '#FEE2E2' : 'transparent', }}>
                 <>
                 <GroupsOutlinedIcon sx={{ color: '#DC2626'}} />
                 <ListItemText primary="Resources" sx={{ color: '#DC2626', fontSize: 10}} />
                 </>
-            </ListItem><ListItem button onClick={() => handleNavigation('/events')} sx={{ flexDirection: 'column', alignItems: 'center' }}>
+            </ListItem><ListItem button onClick={() => handleNavigation('/events')} sx={{ flexDirection: 'column', alignItems: 'center', 
+                backgroundColor: location.pathname === '/events' ? '#FEE2E2' : 'transparent', }}>
                 <>
                 <LocalActivityOutlinedIcon sx={{ color: '#DC2626'}} />
                 <ListItemText primary="Events" sx={{ color: '#DC2626', fontSize: 10}} />
                 </>
-            </ListItem><ListItem button onClick={() => handleNavigation('/')} sx={{ flexDirection: 'column', alignItems: 'center' }}>
+            </ListItem><ListItem button onClick={() => handleNavigation('/')} sx={{ flexDirection: 'column', alignItems: 'center', 
+                backgroundColor: location.pathname === '/' ? '#FEE2E2' : 'transparent', }}>
                 <>
                 <HomeOutlinedIcon sx={{ color: '#DC2626'}} />
                 <ListItemText primary="Explore" sx={{ color: '#DC2626', fontSize: 10}} />
