@@ -7,7 +7,7 @@ const SearchBar = () => {
       <input
         type="text"
         placeholder="Search"
-        className="border rounded px-3 py-2 w-1/2"
+        className="border rounded px-4 py-3 text-sm"
       />
       <div className="flex items-center gap-2">
         <label htmlFor="sort" className="text-sm text-gray-600">

@@ -29,7 +29,11 @@ const Events = () => {
     <>
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <SearchBar />
+        <div className="flex items-center justify-between mb-4">
+          <SearchBar />
+          <h2 className="text-xl font-semibold text-right">Upcoming Events</h2>
+        </div>
+
         <div className="flex flex-col space-y-6">
           {dummyEvents.map((event, index) => (
             <div key={index} style={{ marginBottom: "0.5rem" }}>
