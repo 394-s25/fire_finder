@@ -6,11 +6,13 @@ import EventIcon from '@mui/icons-material/Event';
 import PollIcon from '@mui/icons-material/BarChart';
 import PostModal from './PostModal';
 import EventModal from './EventModal';
+import PollModal from './PollModal';
 
 const NewPostModal = () => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isPostModalOpen, setIsPostModalOpen] = useState(false);
     const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+    const [isPollModalOpen, setIsPollModalOpen] = useState(false);
 
     const toggleExpanded = () => {
         setIsExpanded(!isExpanded);
@@ -31,6 +33,15 @@ const NewPostModal = () => {
     const closeEventModal = () => {
         setIsEventModalOpen(false);
     };
+
+    const openPollModal = () => {
+        setIsPollModalOpen(true);
+    }
+
+    const closePollModal = () => {
+        setIsPollModalOpen(false);
+    };
+
     return (
         <Box
             sx={{
@@ -119,7 +130,7 @@ const NewPostModal = () => {
                         </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <IconButton>
+                        <IconButton onClick={openPollModal}>
                             <PollIcon
                                 sx={{
                                     color: '#F44336',
@@ -143,6 +154,7 @@ const NewPostModal = () => {
             )}
             <PostModal open={isPostModalOpen} onClose={closePostModal} />
             <EventModal open={isEventModalOpen} onClose={closeEventModal} />
+            <PollModal open={isPollModalOpen} onClose={closePollModal} />
         </Box>
     );
 };
