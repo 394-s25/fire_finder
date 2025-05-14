@@ -9,30 +9,55 @@ import { useAuthContext } from "./services/userProvider";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Resources from "./pages/Resources";
-import Events from './pages/Events';
+import Events from "./pages/Events";
+import LoginPage from "./pages/Login";
+import SignupPage from "./pages/Signup";
+import OnboardingForm from "./pages/Onboarding";
 
 const App = () => {
   const PrivateRoute = ({ children }) => {
-    const { user, authLoading } = useAuthContext();
-
-    if (authLoading) {
-      return "Loading...";
-    }
-
-    if (!user) {
-      return <Navigate to="/sign_up" replace />;
-    }
-
-    return children;
+    const { user } = useAuthContext();
+    return user ? children : <Navigate to="/login" replace />;
   };
-  
+
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/resources" element={<Resources />} />
-        <Route path="/events" element={<Events />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/onboarding" element={<OnboardingForm />} />
+        <Route
+          path="/"
+          element={
+            <PrivateRoute>
+              <Home />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/resources"
+          element={
+            <PrivateRoute>
+              <Resources />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/events"
+          element={
+            <PrivateRoute>
+              <Events />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </Router>
   );
