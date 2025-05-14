@@ -4,7 +4,6 @@ import ProfileCard from '../components/ProfileCard';
 import NewPostModal from '../components/NewPost';
 import PostsTabs from '../components/PostsTabs';
 import SortDropdown from '../components/SortDropdown';
-import SearchBar from '../components/Searchbar';
 import PostCard from '../components/PostCard';
 
 const Home = () => {
@@ -15,7 +14,6 @@ const Home = () => {
       <NewPostModal />
       <PostsTabs />
       <SortDropdown />
-      <SearchBar />
       <PostCard />
       {/* Add your main content here */}
     </>

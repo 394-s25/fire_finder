@@ -55,8 +55,8 @@ const Navbar = () => {
               src={logo}
               alt="TC logo"
               sx={{
-                width: { xs: '40px', sm: '50px', md: '50px' },
-                height: { xs: '52px', sm: '65px', md: '65px' },
+                width: { xs: '40px', sm: '50px', md: '45px' },
+                height: { xs: '52px', sm: '65px', md: '50px' },
                 marginLeft: { xs: '5px', sm: '10px', md: '10px' },
                 marginBottom: { xs: '2px', sm: '3px', md: '3px' },
               }}
