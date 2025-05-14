@@ -5,16 +5,29 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import placeholderImg from "../imgs/placeholder.jpeg";
 
-const EventCard = ({ title, date, description }) => {
+const EventCard = ({ title, date, description, image }) => {
   return (
     <Card className="mb-6 rounded-lg overflow-hidden">
       <CardActionArea sx={{ display: "flex", alignItems: "flex-start" }}>
         {/* Left-aligned image */}
-        <div className="w-32 h-32 flex-shrink-0 overflow-hidden">
+        <div
+          style={{
+            width: "15rem", 
+            height: "15rem",
+            flexShrink: 0,
+            overflow: "hidden",
+            borderRadius: "0.375rem",
+          }}
+        >
           <img
-            src={placeholderImg}
-            alt="Event placeholder"
-            className="w-full h-full object-cover"
+            src={image}
+            alt={`${title} image`}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "fill",
+              display: "block",
+            }}
           />
         </div>
 
@@ -57,7 +70,7 @@ const EventCard = ({ title, date, description }) => {
               </p>
             ))}
           </div>
-          
+
           {/* Buttons */}
           <div style={{ display: "flex", gap: "1rem" }}>
             <FormControlLabel
