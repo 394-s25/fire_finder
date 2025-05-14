@@ -6,16 +6,16 @@ import SearchBar from "../components/SearchBar";
 const Events = () => {
   const dummyEvents = [
     {
-      title: "Event 1",
-      date: "05/06/2025",
+      title: "ETHS Skilled Trade Expo",
+      date: "05/05/2025",
       description:
-        "Body text for whatever you’d like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story. What if i make this longer to test how it looks on the card. ",
+        "This expo is tailored for ETHS students exploring career opportunities. You'll discover skilled trade careers that offer great pay, job security, and the satisfaction of creating something tangible every day. Join The Trade Collective for an interactive showcase featuring hands-on demos, networking with industry professionals, and insights into educational pathways leading to rewarding trade professions.\n 2:30 - 5:00 pm CDT \n 1910 Greenwood St",
     },
     {
-      title: "Event 1",
-      date: "05/06/2025",
+      title: "Trade Fair",
+      date: "05/15/2025",
       description:
-        "Body text for whatever you’d like to say. Add main takeaway points, quotes, anecdotes, or even a very very short story.",
+        "Body text for whatever you’d Explore exciting careers in fields like Manufacturing, Plumbing & HVAC, Electrical, Landscaping, Automotive, and Construction Management, where you’ll shape the future through innovation, expertise, and leadership.\n 2:00 pm - 5:00 pm CDT \n Location TBD \n",
     },
     {
       title: "Event 1",

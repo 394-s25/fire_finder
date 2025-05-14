@@ -44,16 +44,20 @@ const EventCard = ({ title, date, description }) => {
           </div>
 
           {/* Description */}
-          <p
+          <div
             style={{
               fontSize: "0.875rem",
               color: "#4b5563",
               marginBottom: "0.75rem",
             }}
           >
-            {description}
-          </p>
-
+            {description.split("\n").map((line, index) => (
+              <p key={index} style={{ margin: 0 }}>
+                {line}
+              </p>
+            ))}
+          </div>
+          
           {/* Buttons */}
           <div style={{ display: "flex", gap: "1rem" }}>
             <FormControlLabel
