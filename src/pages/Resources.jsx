@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/NavBar";
 import { Box, Tabs, Tab, Typography, Grid } from "@mui/material";
 import ClassCard from "../components/ClassCard";
@@ -6,6 +6,8 @@ import TrainingCard from "../components/TrainingCard";
 import TradeCard from "../components/TradeCard";
 import ContactCard from "../components/ContactCard";
 import ResourcesTab from "../components/ResourcesTab";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../services/firestoreConfig";
 
 function TabPanel({ children, value, index }) {
   return (
@@ -17,6 +19,23 @@ function TabPanel({ children, value, index }) {
 
 const Resources = () => {
   const [tab, setTab] = useState(0);
+  const [contacts, setContacts] = useState([]);
+
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "contacts"));
+        const contactData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setContacts(contactData);
+      } catch (error) {
+        console.error("Error fetching contacts: ", error);
+      }
+    };
+    fetchContacts();
+  }, []);
 
   const handleChange = (event, newValue) => {
     setTab(newValue);
@@ -84,25 +103,6 @@ const Resources = () => {
       category: "Manufacturing",
       description:
         "Use heat to fuse metal parts together for construction and repair.",
-    },
-  ];
-
-  const mockContacts = [
-    {
-      id: 1,
-      name: "Jane Smith",
-      role: "Career Counselor",
-      email: "jane.smith@careers.org",
-      phone: "555-123-4567",
-      image: "",
-    },
-    {
-      id: 2,
-      name: "John Doe",
-      role: "Trade School Advisor",
-      email: "john.doe@tradeschool.edu",
-      phone: "555-987-6543",
-      image: "",
     },
   ];
 
@@ -176,7 +176,7 @@ const Resources = () => {
           <TabPanel value={tab} index={3}>
             <ResourcesTab
               title="Contacts"
-              data={mockContacts}
+              data={contacts}
               CardComponent={ContactCard}
             />
           </TabPanel>
