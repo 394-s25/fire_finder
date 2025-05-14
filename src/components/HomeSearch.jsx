@@ -22,8 +22,8 @@ const StyledInput = styled(InputBase)(({ theme }) => ({
         placeholder="Search"
         sx={{ bgcolor: 'transparent',
             position: 'fixed',
-            top: { xs: '260px', sm: '190px', md: '165px' },
-            left: { xs: '10px', sm: '15px', md: '420px' },
+            top: { xs: '270px', sm: '190px', md: '175px' },
+            left: { xs: '10px', sm: '15px', md: '485px' },
             width: { xs: '90%', sm: '80%', md: '15%' },
         }}
         />

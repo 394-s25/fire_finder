@@ -25,55 +25,58 @@ const SortDropdown = () => {
         setSortOption(event.target.value);
     };
 
-    return (
-        <Box
-            sx={{
-                display: 'flex',
-                alignItems: 'center',
-                width: 'auto', // Let parent flex handle width
-                position: 'fixed',
-                top: '145px', // Adjusted to match the tabs
-            }}
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        width: "auto", // Let parent flex handle width
+        position: "fixed",
+        top: "130px", // Adjusted to match the tabs
+      }}
+    >
+      {/* Horizontal line */}
+      <Box
+        sx={{
+          position: "fixed",
+          top: "220px", // Align with the tabs
+          left: "490px", // Adjusted to start from sidebar edge (300px - 50px buffer)
+          right: "610px",
+          height: "1px",
+          bgcolor: "gray", // Match the "Sort" label color
+          zIndex: -1, // Ensure line is behind text
+          bottompadding: "10px",
+        }}
+      />
+      {/* Sort label and dropdown */}
+      <Box
+        sx={{
+          position: "fixed",
+          top: "205px",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          pr: 1,
+          left: "600px",
+          zIndex: 1, // Adjusted to align with the dropdown
+          bottompadding: "10px",
+        }}
+      >
+        <Typography variant="body2" sx={{ mr: -100, color: "gray" }}>
+          Sort:
+        </Typography>
+        <Select
+          value={sortOption}
+          onChange={handleChange}
+          input={<MinimalInput />}
+          sx={{ bgcolor: "transparent", left: "465px", top: "-26px" }}
         >
-            {/* Horizontal line */}
-            <Box
-                sx={{
-                    position: 'fixed',
-                    top: '160px', // Align with the tabs
-                    left: '425px', // Adjusted to start from sidebar edge (300px - 50px buffer)
-                    right: '450px',
-                    height: '1px',
-                    bgcolor: 'gray', // Match the "Sort" label color
-                    zIndex: -1, // Ensure line is behind text
-                }}
-            />
-            {/* Sort label and dropdown */}
-            <Box
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    pr: 1,
-                    zIndex: 1,// Adjusted to align with the dropdown
-                }}
-            >
-                
-                <Typography variant="body2" sx={{ mr: -100, color: 'gray', }}>
-                    Sort:
-                </Typography>
-                <Select
-                    value={sortOption}
-                    onChange={handleChange}
-                    input={<MinimalInput />}
-                    sx={{ bgcolor: 'transparent', left: '680px' }}
-                >
-                    <MenuItem value="Popular">Popular</MenuItem>
-                    <MenuItem value="Latest">Latest</MenuItem>
-                    <MenuItem value="Most Liked">Most Liked</MenuItem>
-                </Select>
-            </Box>
-        </Box>
-    );
+          <MenuItem value="Popular">Popular</MenuItem>
+          <MenuItem value="Recent">Date</MenuItem>
+          <MenuItem value="Most Liked">Newest</MenuItem>
+        </Select>
+      </Box>
+    </Box>
+  );
 };
 
 export default SortDropdown;

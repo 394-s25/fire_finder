@@ -43,7 +43,7 @@ const dummyEvents = [
           <SearchBar />
           <h2
             className="text-xl font-semibold"
-            style={{ color: "black", position: "absolute", left: "150px", top: "90px", marginBotton: "100px" }}
+            style={{ color: "black", position: "absolute", left: "190px", top: "90px", marginBotton: "100px" }}
           >
             Upcoming Events
           </h2>

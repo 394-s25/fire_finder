@@ -26,7 +26,7 @@ const PostCard = () => {
     ]; // Up to 7 placeholder images
     
     return (
-        <Card sx={{ mb: 2, border: '1px solid #ddd', borderRadius: 2, width: '100%', maxWidth: '700px', top: '80px', left: '50px', position: 'relative', zIndex: -1}}>
+        <Card sx={{ mb: 2, border: '1px solid #ddd', borderRadius: 2, width: '100%', maxWidth: '700px', top: '200px', left: '300px', position: 'relative', zIndex: -1}}>
         {/* Profile Section */}
         <CardHeader
             avatar={
@@ -52,6 +52,7 @@ const PostCard = () => {
             <Box
             sx={{
                 display: 'flex',
+                top: "140px",
                 overflowX: 'auto',
                 '&::-webkit-scrollbar': {
                 height: '8px',
