@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
-import { AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemText, Box } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import logo from '../imgs/logo.png'; // Adjust the path to your logo image
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
-import LocalActivityOutlinedIcon from '@mui/icons-material/LocalActivityOutlined';
-import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
-import { useNavigate, useLocation } from 'react-router-dom';
-import Flogo from "../imgs/Flogo.png"; 
+import React, { useState } from "react";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  Box,
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import logo from "../imgs/logo.png"; // Adjust the path to your logo image
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
+import LocalActivityOutlinedIcon from "@mui/icons-material/LocalActivityOutlined";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import { useNavigate, useLocation } from "react-router-dom";
+import Flogo from "../imgs/Flogo.png";
 
 const Navbar = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -19,10 +29,10 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const routeTitles = {
-    '/': 'Explore',
-    '/profile': 'Profile',
-    '/resources': 'Resources',
-    '/events': 'Events',
+    "/": "Explore",
+    "/profile": "Profile",
+    "/resources": "Resources",
+    "/events": "Events",
   };
   const handleNavigation = (path) => {
     navigate(path);
@@ -66,7 +76,7 @@ const Navbar = () => {
               src={Flogo}
               alt="TC logo"
               sx={{
-                width: { xs: "40px", sm: "50px", md: "120px" },
+                width: { xs: "40px", sm: "50px", md: "140px" },
                 height: { xs: "52px", sm: "65px", md: "80px" },
                 marginLeft: { xs: "5px", sm: "10px", md: "-20px" },
                 marginTop: { xs: "2px", sm: "3px", md: "3px" },

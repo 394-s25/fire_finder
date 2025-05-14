@@ -12,7 +12,7 @@ const EventCard = ({ title, date, description, image }) => {
         {/* Left-aligned image */}
         <div
           style={{
-            width: "15rem", 
+            width: "15rem",
             height: "15rem",
             flexShrink: 0,
             overflow: "hidden",
@@ -34,11 +34,10 @@ const EventCard = ({ title, date, description, image }) => {
         {/* Right content area with no padding */}
         <div
           style={{
-            marginLeft: "0.75rem", // gap between image and text
+            marginLeft: "0.75rem",
             flex: 1,
             display: "flex",
             flexDirection: "column",
-            justifyContent: "space-between",
             textAlign: "left",
           }}
         >
@@ -49,7 +48,7 @@ const EventCard = ({ title, date, description, image }) => {
               style={{
                 fontSize: "0.875rem",
                 color: "#6b7280",
-                marginTop: "0.25rem",
+                marginTop: "-0.5rem",
               }}
             >
               {date}
@@ -62,6 +61,7 @@ const EventCard = ({ title, date, description, image }) => {
               fontSize: "0.875rem",
               color: "#4b5563",
               marginBottom: "0.75rem",
+              marginTop: "-0.5rem",
             }}
           >
             {description.split("\n").map((line, index) => (
@@ -71,8 +71,20 @@ const EventCard = ({ title, date, description, image }) => {
             ))}
           </div>
 
-          {/* Buttons */}
-          <div style={{ display: "flex", gap: "1rem" }}>
+          {/* Spacer to push buttons to bottom */}
+          <div style={{ flexGrow: 5 }} />
+
+          {/* Buttons row pinned to bottom */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              paddingBottom: "0.5rem",
+              paddingRight: "0.5rem",
+              paddingLeft: "0.5rem",
+            }}
+          >
+            {/* RSVP Button */}
             <FormControlLabel
               control={
                 <Checkbox
@@ -90,10 +102,13 @@ const EventCard = ({ title, date, description, image }) => {
                 padding: "0 8px",
                 margin: 0,
                 color: "#f97316",
-                "&:hover": { backgroundColor: "rgba(249, 115, 22, 0.05)" },
+                "&:hover": {
+                  backgroundColor: "rgba(249, 115, 22, 0.05)",
+                },
               }}
             />
 
+            {/* Save Button */}
             <FormControlLabel
               control={
                 <Checkbox
@@ -111,7 +126,9 @@ const EventCard = ({ title, date, description, image }) => {
                 padding: "0 8px",
                 margin: 0,
                 color: "#f97316",
-                "&:hover": { backgroundColor: "rgba(249, 115, 22, 0.05)" },
+                "&:hover": {
+                  backgroundColor: "rgba(249, 115, 22, 0.05)",
+                },
               }}
             />
           </div>

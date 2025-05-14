@@ -5,6 +5,8 @@ import SearchBar from "../components/SearchBar";
 import placeholderImg from "../imgs/placeholder.jpeg";
 import TradeExpo from "../imgs/TradeExpo.jpeg";
 import CareerFair from "../imgs/CareerFair.jpg";
+import SortDropdown from "../components/Eventsdropdown";
+
 
 const Events = () => {
 const dummyEvents = [
@@ -34,12 +36,24 @@ const dummyEvents = [
     <>
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-4">
+        <div
+          className="flex items-center justify-between mb-4"
+          style={{ marginBottom: "0.5rem", marginTop: "4.5rem" }}
+        >
           <SearchBar />
-          <h2 className="text-xl font-semibold text-right">Upcoming Events</h2>
+          <h2
+            className="text-xl font-semibold"
+            style={{ color: "black", position: "absolute", left: "150px", top: "90px", marginBotton: "100px" }}
+          >
+            Upcoming Events
+          </h2>
         </div>
+        <SortDropdown />
 
-        <div className="flex flex-col space-y-6">
+        <div
+          className="flex flex-col space-y-6"
+          style={{ marginBottom: "0.5rem", marginTop: "8.5rem" }}
+        >
           {dummyEvents.map((event, index) => (
             <div key={index} style={{ marginBottom: "0.5rem" }}>
               <EventCard
@@ -57,3 +71,4 @@ const dummyEvents = [
 };
 
 export default Events;
+
