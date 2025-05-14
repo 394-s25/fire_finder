@@ -24,9 +24,9 @@ const PostCard = () => {
         '/path/to/sample-image6.jpg',
         '/path/to/sample-image7.jpg',
     ]; // Up to 7 placeholder images
-
+    
     return (
-        <Card sx={{ mb: 2, border: '1px solid #ddd', borderRadius: 2, width: '100%', maxWidth: '700px', top: '150px', left: '50px', position: 'relative', zIndex: -1}}>
+        <Card sx={{ mb: 2, border: '1px solid #ddd', borderRadius: 2, width: '100%', maxWidth: '700px', top: '80px', left: '50px', position: 'relative', zIndex: -1}}>
         {/* Profile Section */}
         <CardHeader
             avatar={
@@ -82,7 +82,8 @@ const PostCard = () => {
                     objectFit: 'cover',
                     scrollSnapAlign: 'center',
                     pr: 0.5,
-                    pl: 0.5
+                    pl: 0.5,
+                    pb: 0.5,
                 }}
                 image={file}
                 alt={`Post image ${index + 1}`}

@@ -1,7 +1,7 @@
 import React from "react";
 import Navbar from "../components/NavBar";
 import EventCard from "../components/EventCard";
-import SearchBar from "../components/SearchBar";
+import SearchBar from "../components/Searchbar";
 
 const Events = () => {
   const dummyEvents = [
