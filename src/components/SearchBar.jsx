@@ -1,33 +1,25 @@
-import React from 'react';
-import { InputBase, styled } from '@mui/material';
+// SearchBar.jsx
+import React from "react";
 
-const StyledInput = styled(InputBase)(({ theme }) => ({
-    '& .MuiInputBase-input': {
-        borderRadius: '25px',
-        backgroundColor: 'transparent',
-        border: '1px solid #ddd',
-        fontSize: 14,
-        padding: '5px 12px',
-        transition: theme.transitions.create(['border-color', 'box-shadow']),
-        '&:focus': {
-        borderColor: '#ddd',
-        boxShadow: '0 0 0 0.2rem rgba(0,0,0,0.05)',
-        },
-    },
-    }));
-
-    const SearchBar = () => {
-    return (
-        <StyledInput
+const SearchBar = () => {
+  return (
+    <div className="flex items-center justify-between mb-4">
+      <input
+        type="text"
         placeholder="Search"
-        sx={{ bgcolor: 'transparent',
-            position: 'fixed',
-            top: { xs: '260px', sm: '190px', md: '165px' },
-            left: { xs: '10px', sm: '15px', md: '420px' },
-            width: { xs: '90%', sm: '80%', md: '15%' },
-        }}
-        />
-    );
+        className="border rounded px-4 py-3 text-sm"
+      />
+      <div className="flex items-center gap-2">
+        <label htmlFor="sort" className="text-sm text-gray-600">
+          Sort:
+        </label>
+        <select id="sort" className="border rounded px-2 py-1 text-sm">
+          <option value="popular">Popular</option>
+          <option value="upcoming">Upcoming</option>
+        </select>
+      </div>
+    </div>
+  );
 };
 
 export default SearchBar;
