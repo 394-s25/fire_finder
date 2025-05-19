@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -7,48 +7,106 @@ import {
   MenuItem,
   Select,
   InputLabel,
+  Paper,
   FormControl,
   Chip,
   OutlinedInput,
+  Autocomplete,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { doc, setDoc } from "firebase/firestore";
+import {
+  addDoc,
+  doc,
+  getDocs,
+  setDoc,
+  collection,
+  query,
+  where,
+} from "firebase/firestore";
 import { auth, db } from "../services/firestoreConfig";
 import FormContainer from "../components/FormContainer";
-
-const tradeOptions = [
-  "Electrician",
-  "Plumber",
-  "Welder",
-  "Carpenter",
-  "HVAC Technician",
-  "Mechanic",
-  "Construction Worker",
-];
 
 const schoolYears = ["9th Grade", "10th Grade", "11th Grade", "12th Grade"];
 
 export default function OnboardingForm() {
+  const [tradeOptions, setTradeOptions] = useState([]);
   const [interests, setInterests] = useState([]);
   const [year, setYear] = useState("");
-  const [experience, setExperience] = useState("");
-  const [skills, setSkills] = useState("");
+  const [experienceList, setExperienceList] = useState([]);
+  const [expForm, setExpForm] = useState({
+    employer: "",
+    jobTitle: "",
+    start: "",
+    end: "",
+  });
+  const [skills, setSkills] = useState([]);
+  const [selectedSkills, setSelectedSkills] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchTrades = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "trades"));
+        const options = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().name,
+        }));
+        setTradeOptions(options);
+      } catch (error) {
+        console.error("Error fetching trades: ", error);
+      }
+    };
+    fetchTrades();
+  }, []);
+
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "skills"));
+        const options = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().name,
+        }));
+        setSkills(options);
+      } catch (error) {
+        console.error("Error fetching skills: ", error);
+      }
+    };
+    fetchSkills();
+  }, []);
 
   const handleSubmit = async () => {
     const user = auth.currentUser;
     if (!user) return alert("Not logged in");
+
+    const interestRefs = interests.map((id) => doc(db, "trades", id));
+    const skillsRefs = collection(db, "skills");
+
+    const skillRefs = await Promise.all(
+      selectedSkills.map(async (skill) => {
+        if (skill.id) return doc(db, "skills", skill.id);
+        const existing = await getDocs(
+          query(skillsRefs, where("name", "==", skill.name))
+        );
+        if (!existing.empty) return existing.docs[0].ref;
+        const newSkill = await addDoc(skillsRefs, { name: skill.name });
+        return newSkill;
+      })
+    );
 
     try {
       await setDoc(doc(db, "students", user.uid), {
         uid: user.uid,
         displayName: user.displayName || "",
         email: user.email,
-        interests,
+        interests: interestRefs,
         year,
-        experience,
-        skills,
+        skills: skillRefs,
       });
+
+      for (const exp of experienceList) {
+        await addDoc(collection(db, "students", user.uid, "experience"), exp);
+      }
       navigate("/");
     } catch (error) {
       alert(error.message);
@@ -66,15 +124,16 @@ export default function OnboardingForm() {
           input={<OutlinedInput label="Trade Interests" />}
           renderValue={(selected) => (
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-              {selected.map((value) => (
-                <Chip key={value} label={value} />
-              ))}
+              {selected.map((id) => {
+                const trade = tradeOptions.find((t) => t.id === id);
+                return <Chip key={id} label={trade?.name || id} />;
+              })}
             </Box>
           )}
         >
           {tradeOptions.map((trade) => (
-            <MenuItem key={trade} value={trade}>
-              {trade}
+            <MenuItem key={trade.id} value={trade.id}>
+              {trade.name}
             </MenuItem>
           ))}
         </Select>
@@ -95,25 +154,126 @@ export default function OnboardingForm() {
         </Select>
       </FormControl>
 
-      <TextField
-        fullWidth
-        label="Work Experience"
-        multiline
-        rows={4}
-        margin="normal"
-        value={experience}
-        onChange={(e) => setExperience(e.target.value)}
-      />
+      <Paper elevation={2} sx={{ p: 2, mt: 2 }}>
+        <Typography variant="h6" fontWeight="bold" gutterBottom>
+          Add Work Experience
+        </Typography>
 
-      <TextField
+        <TextField
+          fullWidth
+          label="Employer"
+          value={expForm.employer}
+          onChange={(e) => setExpForm({ ...expForm, employer: e.target.value })}
+          margin="normal"
+        />
+        <TextField
+          fullWidth
+          label="Job Title"
+          value={expForm.jobTitle}
+          onChange={(e) => setExpForm({ ...expForm, jobTitle: e.target.value })}
+          margin="normal"
+        />
+        <TextField
+          fullWidth
+          label="Start Date"
+          type="date"
+          InputLabelProps={{ shrink: true }}
+          value={expForm.start}
+          onChange={(e) => setExpForm({ ...expForm, start: e.target.value })}
+          margin="normal"
+        />
+        <TextField
+          fullWidth
+          label="End Date"
+          type="date"
+          InputLabelProps={{ shrink: true }}
+          value={expForm.end}
+          onChange={(e) => setExpForm({ ...expForm, end: e.target.value })}
+          margin="normal"
+        />
+        <Button
+          fullWidth
+          variant="outlined"
+          onClick={() => {
+            if (expForm.employer && expForm.jobTitle) {
+              setExperienceList([...experienceList, expForm]);
+              setExpForm({ employer: "", jobTitle: "", start: "", end: "" });
+            }
+          }}
+          sx={{ mt: 2 }}
+        >
+          Add Work Experience
+        </Button>
+      </Paper>
+
+      {experienceList.map((exp, index) => (
+        <Paper
+          key={index}
+          elevation={1}
+          sx={{
+            mt: 2,
+            p: 2,
+            borderRadius: 2,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Box>
+            <Typography fontWeight="bold">{exp.jobTitle}</Typography>
+            <Typography>{exp.employer}</Typography>
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              {exp.start} – {exp.end || "Present"}
+            </Typography>
+          </Box>
+          <Button
+            variant="text"
+            color="error"
+            size="small"
+            onClick={() => {
+              const updated = [...experienceList];
+              updated.splice(index, 1);
+              setExperienceList(updated);
+            }}
+          >
+            Delete
+          </Button>
+        </Paper>
+      ))}
+
+      <Autocomplete
+        multiple
+        freeSolo
         fullWidth
-        label="Skills"
-        multiline
-        rows={2}
-        margin="normal"
-        value={skills}
-        onChange={(e) => setSkills(e.target.value)}
-        placeholder="e.g. teamwork, problem solving, power tools"
+        options={skills}
+        getOptionLabel={(option) =>
+          typeof option === "string" ? option : option.name
+        }
+        value={selectedSkills}
+        onChange={(_, newValue) => {
+          const unique = newValue.map((item) =>
+            typeof item === "string" ? { name: item } : item
+          );
+          setSelectedSkills(unique);
+        }}
+        filterSelectedOptions
+        renderTags={(value, getTagProps) =>
+          value.map((option, index) => (
+            <Chip
+              label={typeof option === "string" ? option : option.name}
+              {...getTagProps({ index })}
+              key={index}
+            />
+          ))
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Skills"
+            placeholder="Start typing to search..."
+            margin="normal"
+          />
+        )}
       />
 
       <Button
