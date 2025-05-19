@@ -7,14 +7,24 @@ import {
   IconButton,
   Paper,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Select,
+  MenuItem,
+  OutlinedInput,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { useState, useEffect } from "react";
 import { auth, db } from "../services/firestoreConfig";
-import { doc, getDoc, getDocs, collection } from "firebase/firestore";
+import { doc, getDoc, getDocs, collection, setDoc } from "firebase/firestore";
 import Navbar from "../components/NavBar";
 
-function Section({ title, children }) {
+function Section({ title, children, onEdit }) {
   return (
     <Box>
       <Box
@@ -25,9 +35,11 @@ function Section({ title, children }) {
         }}
       >
         <Typography fontWeight="bold">{title}</Typography>
-        <IconButton size="small">
-          <EditIcon fontSize="small" />
-        </IconButton>
+        {onEdit && (
+          <IconButton size="small" onClick={onEdit}>
+            <EditIcon fontSize="small" />
+          </IconButton>
+        )}
       </Box>
       <Box sx={{ mt: 1 }}>{children}</Box>
       <Divider sx={{ mt: 2 }} />
@@ -42,6 +54,10 @@ const Profile = () => {
   const [skills, setSkills] = useState([]);
   const [experience, setExperience] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [editInterestsOpen, setEditInterestsOpen] = useState(false);
+  const [allTrades, setAllTrades] = useState([]);
+  const [selectedTradeRefs, setSelectedTradeRefs] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,6 +100,35 @@ const Profile = () => {
     };
     fetchData();
   }, [user]);
+
+  useEffect(() => {
+    const loadTrades = async () => {
+      try {
+        const snap = await getDocs(collection(db, "trades"));
+        const trades = snap.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().name,
+          ref: doc.ref,
+        }));
+        setAllTrades(trades);
+      } catch (error) {
+        console.error("Error fetching all trades: ", error);
+      }
+    };
+    loadTrades();
+  }, []);
+
+  const openEditInterests = () => {
+    setSelectedTradeRefs(studentData.interests || []);
+    setEditInterestsOpen(true);
+  };
+
+  const saveInterests = async () => {
+    const studentRef = doc(db, "students", user.uid);
+    await setDoc(studentRef, { interests: selectedTradeRefs }, { merge: true });
+    setEditInterestsOpen(false);
+    window.location.reload();
+  };
 
   if (loading) {
     return (
@@ -131,7 +176,7 @@ const Profile = () => {
             </Box>
           </Box>
           <Box sx={{ mt: 4, display: "flex", flexDirection: "column", gap: 3 }}>
-            <Section title="Interested In">
+            <Section title="Interested In" onEdit={openEditInterests}>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                 {interests.map((trade, idx) => (
                   <Chip
@@ -181,6 +226,48 @@ const Profile = () => {
           </Box>
         </Box>
       </Box>
+      <Dialog
+        open={editInterestsOpen}
+        onClose={() => setEditInterestsOpen(false)}
+        fullWidth
+      >
+        <DialogTitle>Edit Trade Interests</DialogTitle>
+        <DialogContent>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Trade Interests</InputLabel>
+            <Select
+              multiple
+              value={selectedTradeRefs}
+              onChange={(e) => setSelectedTradeRefs(e.target.value)}
+              input={<OutlinedInput label="Trade Interests" />}
+              renderValue={(selected) => (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {selected.map((ref) => {
+                    const trade = allTrades.find(
+                      (t) => t.ref.path === ref.path
+                    );
+                    return (
+                      <Chip key={ref.path} label={trade?.name || "Unknown"} />
+                    );
+                  })}
+                </Box>
+              )}
+            >
+              {allTrades.map((trade) => (
+                <MenuItem key={trade.id} value={trade.ref}>
+                  {trade.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditInterestsOpen(false)}>Cancel</Button>
+          <Button onClick={saveInterests} variant="contained">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
