@@ -20,6 +20,8 @@ function TabPanel({ children, value, index }) {
 const Resources = () => {
   const [tab, setTab] = useState(0);
   const [contacts, setContacts] = useState([]);
+  const [trades, setTrades] = useState([]);
+  const [trainings, setTrainings] = useState([]);
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -37,74 +39,41 @@ const Resources = () => {
     fetchContacts();
   }, []);
 
+  useEffect(() => {
+    const fetchTrades = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "trades"));
+        const tradeData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setTrades(tradeData);
+      } catch (error) {
+        console.error("Error fetching trades: ", error);
+      }
+    };
+    fetchTrades();
+  }, []);
+
+  useEffect(() => {
+    const fetchTrainings = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "trainings"));
+        const trainingsData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setTrainings(trainingsData);
+      } catch (error) {
+        console.error("Error fetching trainings: ", error);
+      }
+    };
+    fetchTrainings();
+  }, []);
+
   const handleChange = (event, newValue) => {
     setTab(newValue);
   };
-
-  const mockClasses = [
-    {
-      id: 1,
-      trade: "Electrician",
-      instructor: "Mr. Watts",
-      location: "123 random ave, Evanston, IL, 60201",
-      start: "05/08/2025",
-      end: "06/27/2025",
-    },
-    {
-      id: 2,
-      trade: "Electrician",
-      instructor: "Mr. Watts",
-      location: "123 random ave, Evanston, IL, 60201",
-      start: "05/08/2025",
-      end: "06/27/2025",
-    },
-    {
-      id: 3,
-      trade: "Electrician",
-      instructor: "Mr. Watts",
-      location: "123 random ave, Evanston, IL, 60201",
-      start: "05/08/2025",
-      end: "06/27/2025",
-    },
-  ];
-
-  const mockTrainings = [
-    {
-      id: 1,
-      topic: "Resume Building",
-      title: "How to Write a Great Resume",
-      instructor: "Career Center",
-      duration: "2 hours",
-      description:
-        "Learn the essentials of resume formatting and content creation.",
-    },
-    {
-      id: 2,
-      topic: "Interview Skills",
-      title: "Nailing the Interview",
-      instructor: "Job Prep Center",
-      duration: "1.5 hours",
-      description:
-        "Practice common questions and responses to boost confidence.",
-    },
-  ];
-
-  const mockTrades = [
-    {
-      id: 1,
-      name: "Electrician",
-      category: "Construction",
-      description:
-        "Install and maintain electrical systems in homes and buildings.",
-    },
-    {
-      id: 2,
-      name: "Welder",
-      category: "Manufacturing",
-      description:
-        "Use heat to fuse metal parts together for construction and repair.",
-    },
-  ];
 
   return (
     <>
@@ -141,7 +110,6 @@ const Resources = () => {
               },
             }}
           >
-            <Tab label="Classes" />
             <Tab label="Training" />
             <Tab label="Trades" />
             <Tab label="Contacts" />
@@ -151,29 +119,21 @@ const Resources = () => {
         <Box sx={{ px: 2, pb: 5 }}>
           <TabPanel value={tab} index={0}>
             <ResourcesTab
-              title="Explore Classes"
-              data={mockClasses}
-              CardComponent={ClassCard}
+              title="Training Resources"
+              data={trainings}
+              CardComponent={TrainingCard}
             />
           </TabPanel>
 
           <TabPanel value={tab} index={1}>
             <ResourcesTab
-              title="Training Resources"
-              data={mockTrainings}
-              CardComponent={TrainingCard}
-            />
-          </TabPanel>
-
-          <TabPanel value={tab} index={2}>
-            <ResourcesTab
               title="Trade Information"
-              data={mockTrades}
+              data={trades}
               CardComponent={TradeCard}
             />
           </TabPanel>
 
-          <TabPanel value={tab} index={3}>
+          <TabPanel value={tab} index={2}>
             <ResourcesTab
               title="Contacts"
               data={contacts}
