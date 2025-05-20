@@ -6,8 +6,8 @@ import TrainingCard from "../components/TrainingCard";
 import TradeCard from "../components/TradeCard";
 import ContactCard from "../components/ContactCard";
 import ResourcesTab from "../components/ResourcesTab";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../services/firestoreConfig";
+import { doc, collection, getDoc, getDocs } from "firebase/firestore";
+import { auth, db } from "../services/firestoreConfig";
 
 function TabPanel({ children, value, index }) {
   return (
@@ -18,10 +18,12 @@ function TabPanel({ children, value, index }) {
 }
 
 const Resources = () => {
+  const user = auth.currentUser;
   const [tab, setTab] = useState(0);
   const [contacts, setContacts] = useState([]);
   const [trades, setTrades] = useState([]);
   const [trainings, setTrainings] = useState([]);
+  const [savedTrades, setSavedTrades] = useState([]);
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -52,8 +54,26 @@ const Resources = () => {
         console.error("Error fetching trades: ", error);
       }
     };
+    const fetchSavedTrades = async () => {
+      try {
+        if (!user) return;
+        const studentDoc = await getDoc(doc(db, "students", user.uid));
+        if (!studentDoc.exists()) return;
+        const refs = studentDoc.data().interests || [];
+        const trades = await Promise.all(
+          refs.map(async (ref) => {
+            const snap = await getDoc(ref);
+            return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+          })
+        );
+        setSavedTrades(trades.filter(Boolean));
+      } catch (error) {
+        console.error("Error fetching saved trades: ", error);
+      }
+    };
     fetchTrades();
-  }, []);
+    fetchSavedTrades();
+  }, [user]);
 
   useEffect(() => {
     const fetchTrainings = async () => {
@@ -126,6 +146,13 @@ const Resources = () => {
           </TabPanel>
 
           <TabPanel value={tab} index={1}>
+            {savedTrades.length > 0 && (
+              <ResourcesTab
+                title="Your Trades"
+                data={savedTrades}
+                CardComponent={TradeCard}
+              />
+            )}
             <ResourcesTab
               title="Trade Information"
               data={trades}

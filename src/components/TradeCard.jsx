@@ -5,9 +5,47 @@ import {
   CardContent,
   Chip,
   Typography,
+  IconButton,
 } from "@mui/material";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
+import { auth, db } from "../services/firestoreConfig";
+import { useEffect, useState } from "react";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 export default function TradeCard({ data }) {
+  const user = auth.currentUser;
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    const checkSaved = async () => {
+      if (!user) return;
+      const studentRef = doc(db, "students", user.uid);
+      const studentSnap = await getDoc(studentRef);
+      const interests = studentSnap.data()?.interests || [];
+      const tradePath = `trades/${data.id}`;
+      const saved = interests.some((ref) => ref.path === tradePath);
+      setIsSaved(saved);
+    };
+    checkSaved();
+  }, [user, data.id]);
+
+  const toggleBookmark = async () => {
+    if (!user) return;
+    const studentRef = doc(db, "students", user.uid);
+    const tradeRef = doc(db, "trades", data.id);
+    const studentSnap = await getDoc(studentRef);
+    const currentInterests = studentSnap.data()?.interests || [];
+    const alreadySaved = currentInterests.some(
+      (ref) => ref.path === tradeRef.path
+    );
+    const updatedInterests = alreadySaved
+      ? currentInterests.filter((ref) => ref.path !== tradeRef.path)
+      : [...currentInterests, tradeRef];
+    await updateDoc(studentRef, { interests: updatedInterests });
+    setIsSaved(!alreadySaved);
+  };
+
   return (
     <Card
       sx={{
@@ -15,6 +53,7 @@ export default function TradeCard({ data }) {
         boxShadow: 1,
         backgroundColor: "white",
         border: "1px solid #ddd",
+        position: "relative",
       }}
     >
       <Box sx={{ px: 2, pt: 1 }}>
@@ -27,6 +66,12 @@ export default function TradeCard({ data }) {
           }}
           size="small"
         />
+        <IconButton
+          onClick={toggleBookmark}
+          sx={{ position: "absolute", top: 8, right: 8 }}
+        >
+          {isSaved ? <BookmarkIcon color="primary" /> : <BookmarkBorderIcon />}
+        </IconButton>
       </Box>
       <CardContent>
         <Typography variant="h6" fontWeight="bold" gutterBottom>
