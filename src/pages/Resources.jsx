@@ -151,12 +151,14 @@ const Resources = () => {
                 title="Your Trades"
                 data={savedTrades}
                 CardComponent={TradeCard}
+                extraProps={{ savedTrades, setSavedTrades }}
               />
             )}
             <ResourcesTab
               title="Trade Information"
               data={trades}
               CardComponent={TradeCard}
+              extraProps={{ savedTrades, setSavedTrades }}
             />
           </TabPanel>
 

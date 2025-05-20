@@ -1,6 +1,11 @@
 import { Grid, Typography } from "@mui/material";
 
-export default function ResourcesTab({ title, data, CardComponent }) {
+export default function ResourcesTab({
+  title,
+  data,
+  CardComponent,
+  extraProps = {},
+}) {
   return (
     <>
       <Typography variant="h5" gutterBottom>
@@ -13,7 +18,7 @@ export default function ResourcesTab({ title, data, CardComponent }) {
             columnSpacing={2}
             sx={{ gridColumn: { xs: "span 4", sm: "span 4", md: "span 4" } }}
           >
-            <CardComponent data={item} />
+            <CardComponent data={item} {...extraProps} />
           </Grid>
         ))}
       </Grid>

@@ -13,22 +13,9 @@ import { auth, db } from "../services/firestoreConfig";
 import { useEffect, useState } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 
-export default function TradeCard({ data }) {
+export default function TradeCard({ data, savedTrades = [], setSavedTrades }) {
   const user = auth.currentUser;
-  const [isSaved, setIsSaved] = useState(false);
-
-  useEffect(() => {
-    const checkSaved = async () => {
-      if (!user) return;
-      const studentRef = doc(db, "students", user.uid);
-      const studentSnap = await getDoc(studentRef);
-      const interests = studentSnap.data()?.interests || [];
-      const tradePath = `trades/${data.id}`;
-      const saved = interests.some((ref) => ref.path === tradePath);
-      setIsSaved(saved);
-    };
-    checkSaved();
-  }, [user, data.id]);
+  const isSaved = savedTrades.some((t) => t.id === data.id);
 
   const toggleBookmark = async () => {
     if (!user) return;
@@ -39,11 +26,13 @@ export default function TradeCard({ data }) {
     const alreadySaved = currentInterests.some(
       (ref) => ref.path === tradeRef.path
     );
-    const updatedInterests = alreadySaved
+    const updatedRefs = alreadySaved
       ? currentInterests.filter((ref) => ref.path !== tradeRef.path)
       : [...currentInterests, tradeRef];
-    await updateDoc(studentRef, { interests: updatedInterests });
-    setIsSaved(!alreadySaved);
+    await updateDoc(studentRef, { interests: updatedRefs });
+    setSavedTrades((prev) =>
+      alreadySaved ? prev.filter((t) => t.id !== data.id) : [...prev, data]
+    );
   };
 
   return (
