@@ -23,6 +23,9 @@ import { useState, useEffect } from "react";
 import { auth, db } from "../services/firestoreConfig";
 import { doc, getDoc, getDocs, collection, setDoc } from "firebase/firestore";
 import Navbar from "../components/NavBar";
+import { data } from "react-router-dom";
+
+const schoolYears = ["9th Grade", "10th Grade", "11th Grade", "12th Grade"];
 
 function Section({ title, children, onEdit }) {
   return (
@@ -62,6 +65,9 @@ const Profile = () => {
   const [editSkillsOpen, setEditSkillsOpen] = useState(false);
   const [allSkills, setAllSkills] = useState([]);
   const [selectedSkillRefs, setSelectedSkillRefs] = useState([]);
+
+  const [editYearOpen, setEditYearOpen] = useState(false);
+  const [selectedYear, setSelectedYear] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -134,6 +140,7 @@ const Profile = () => {
     };
     loadTrades();
     loadSkills();
+    setSelectedYear(data.year || "");
   }, []);
 
   const openEditInterests = () => {
@@ -157,6 +164,13 @@ const Profile = () => {
     const studentRef = doc(db, "students", user.uid);
     await setDoc(studentRef, { skills: selectedSkillRefs }, { merge: true });
     setEditSkillsOpen(false);
+    window.location.reload();
+  };
+
+  const saveYear = async () => {
+    const studentRef = doc(db, "students", user.uid);
+    await setDoc(studentRef, { year: selectedYear }, { merge: true });
+    setEditYearOpen(false);
     window.location.reload();
   };
 
@@ -230,7 +244,7 @@ const Profile = () => {
                 ))}
               </Box>
             </Section>
-            <Section title="School Year">
+            <Section title="School Year" onEdit={() => setEditYearOpen(true)}>
               <Typography>{studentData?.year || "Not specified"}</Typography>
             </Section>
             <Section title="Work Experience">
@@ -356,6 +370,35 @@ const Profile = () => {
         <DialogActions>
           <Button onClick={() => setEditSkillsOpen(false)}>Cancel</Button>
           <Button onClick={saveSkills} variant="contained">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={editYearOpen}
+        onClose={() => setEditYearOpen(false)}
+        fullWidth
+      >
+        <DialogTitle>Edit School Year</DialogTitle>
+        <DialogContent>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>School Year</InputLabel>
+            <Select
+              value={selectedYear}
+              label="School Year"
+              onChange={(e) => setSelectedYear(e.target.value)}
+            >
+              {schoolYears.map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditYearOpen(false)}>Cancel</Button>
+          <Button onClick={saveYear} variant="contained">
             Save
           </Button>
         </DialogActions>
