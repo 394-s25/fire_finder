@@ -8,6 +8,8 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
   GoogleAuthProvider,
+  setPersistence,
+  browserLocalPersistence,
 } from "firebase/auth";
 import { auth, googleProvider } from "./firestoreConfig";
 
@@ -18,25 +20,44 @@ export const UserProvider = ({ children }) => {
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
+    const setupPersistence = async () => {
+      try {
+        await setPersistence(auth, browserLocalPersistence);
+        console.log("Firebase persistence set to LOCAL");
+      } catch (error) {
+        console.error("Firebase persistence error:", error);
+      }
+    };
+    setupPersistence();
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
+      console.log("Auth state changed:", u ? `User ${u.uid}` : "No user");
       setUser(u);
       setAuthLoading(false);
     });
     return unsubscribe;
   }, [auth]);
 
-  const loginWithEmail = (email, password) =>
-    signInWithEmailAndPassword(auth, email, password);
+  const loginWithEmail = async (email, password) => {
+    await setPersistence(auth, browserLocalPersistence);
+    return signInWithEmailAndPassword(auth, email, password);
+  };
 
-  const signupWithEmail = (email, password, displayName) =>
-    createUserWithEmailAndPassword(auth, email, password).then((cred) => {
-      if (displayName) {
-        return updateProfile(cred.user, { displayName });
-      }
-    });
+  const signupWithEmail = async (email, password, displayName) => {
+    await setPersistence(auth, browserLocalPersistence);
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    if (displayName) {
+      await updateProfile(cred.user, { displayName });
+    }
+    return cred;
+  };
 
-  const loginWithGoogle = () => signInWithPopup(auth, googleProvider);
-
+  const loginWithGoogle = async () => {
+    await setPersistence(auth, browserLocalPersistence);
+    return signInWithPopup(auth, googleProvider);
+  };
   const logout = () => signOut(auth);
 
   return (
@@ -50,7 +71,7 @@ export const UserProvider = ({ children }) => {
         logout,
       }}
     >
-      {children}
+      {!authLoading ? children : <div>Loading authentication...</div>}
     </AuthContext.Provider>
   );
 };

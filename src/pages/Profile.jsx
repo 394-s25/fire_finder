@@ -32,6 +32,7 @@ import {
 } from "firebase/firestore";
 import Navbar from "../components/NavBar";
 import { data } from "react-router-dom";
+import { useAuthContext } from "../services/userProvider";
 
 const schoolYears = ["9th Grade", "10th Grade", "11th Grade", "12th Grade"];
 
@@ -59,7 +60,7 @@ function Section({ title, children, onEdit }) {
 }
 
 const Profile = () => {
-  const user = auth.currentUser;
+  const user = useAuthContext();
   const [studentData, setStudentData] = useState(null);
   const [interests, setInterests] = useState([]);
   const [skills, setSkills] = useState([]);
@@ -83,11 +84,17 @@ const Profile = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (!user) return;
+        if (!user) {
+          setLoading(false);
+          return;
+        }
 
         const studentRef = doc(db, "students", user.uid);
         const studentSnap = await getDoc(studentRef);
-        if (!studentSnap.exists()) return;
+        if (!studentSnap.exists()) {
+          setLoading(false);
+          return;
+        }
 
         const data = studentSnap.data();
         setStudentData(data);

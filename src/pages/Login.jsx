@@ -1,30 +1,37 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, googleProvider } from "../services/firestoreConfig";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { useAuthContext } from "../services/userProvider";
 import { Button, TextField, Box, Typography, Link } from "@mui/material";
 import FormContainer from "../components/FormContainer";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { loginWithEmail, loginWithGoogle } = useAuthContext();
 
   const login = async () => {
+    setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await loginWithEmail(email, password);
       navigate("/");
     } catch (err) {
       alert(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const loginWithGoogle = async () => {
+  const handleLoginWithGoogle = async () => {
+    setLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
+      await loginWithGoogle();
       navigate("/");
     } catch (err) {
       alert(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -36,6 +43,7 @@ export default function LoginPage() {
         margin="normal"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        disabled={loading}
       />
       <TextField
         fullWidth
@@ -44,15 +52,23 @@ export default function LoginPage() {
         margin="normal"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        disabled={loading}
       />
-      <Button fullWidth variant="contained" onClick={login} sx={{ mt: 2 }}>
+      <Button
+        fullWidth
+        variant="contained"
+        onClick={login}
+        sx={{ mt: 2 }}
+        disabled={loading}
+      >
         Login
       </Button>
       <Button
         fullWidth
         variant="outlined"
-        onClick={loginWithGoogle}
+        onClick={handleLoginWithGoogle}
         sx={{ mt: 1 }}
+        disabled={loading}
       >
         Login with Google
       </Button>

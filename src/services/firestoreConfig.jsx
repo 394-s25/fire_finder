@@ -1,7 +1,11 @@
 import { initializeApp } from "firebase/app";
 import { GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import {
+  getAuth,
+  setPersistence,
+  browserLocalPersistence,
+} from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDRMy1c13u1_UgZl7MpeqIowDmkJcOSMJg",
@@ -16,6 +20,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+setPersistence(auth, browserLocalPersistence).catch((error) => {
+  console.error("Firebase persistence error:", error.message);
+});
+
 const googleProvider = new GoogleAuthProvider();
 
 export { db, auth, googleProvider };
