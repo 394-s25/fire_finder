@@ -290,6 +290,21 @@ const Profile = () => {
                   </Paper>
                 ))
               )}
+              <Button
+                variant="outlined"
+                sx={{ mt: 2 }}
+                onClick={() => {
+                  setExperienceToEdit({
+                    jobTitle: "",
+                    employer: "",
+                    start: "",
+                    end: "",
+                  });
+                  setEditExpOpen(true);
+                }}
+              >
+                + Add Work Experience
+              </Button>
             </Section>
           </Box>
         </Box>
@@ -432,7 +447,11 @@ const Profile = () => {
         onClose={() => setEditExpOpen(false)}
         fullWidth
       >
-        <DialogTitle>Edit Work Experience</DialogTitle>
+        {experienceToEdit?.id ? (
+          <DialogTitle>Edit Work Experience</DialogTitle>
+        ) : (
+          <DialogTitle>Add Work Experience</DialogTitle>
+        )}
         <DialogContent>
           <TextField
             fullWidth
@@ -485,28 +504,35 @@ const Profile = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button
-            color="error"
-            onClick={async () => {
-              await deleteDoc(
-                doc(db, "students", user.uid, "experience", experienceToEdit.id)
-              );
-              setEditExpOpen(false);
-              window.location.reload();
-            }}
-          >
-            Delete
-          </Button>
+          {experienceToEdit?.id && (
+            <Button
+              color="error"
+              onClick={async () => {
+                await deleteDoc(
+                  doc(
+                    db,
+                    "students",
+                    user.uid,
+                    "experience",
+                    experienceToEdit.id
+                  )
+                );
+                setEditExpOpen(false);
+                window.location.reload();
+              }}
+            >
+              Delete
+            </Button>
+          )}
           <Button onClick={() => setEditExpOpen(false)}>Cancel</Button>
           <Button
             variant="contained"
             onClick={async () => {
               const { id, ...data } = experienceToEdit;
-              await setDoc(
-                doc(db, "students", user.uid, "experience", id),
-                data,
-                { merge: true }
-              );
+              const expRef = id
+                ? doc(db, "students", user.uid, "experience", id)
+                : doc(collection(db, "students", user.uid, "experience"));
+              await setDoc(expRef, data, { merge: true });
               setEditExpOpen(false);
               window.location.reload();
             }}
