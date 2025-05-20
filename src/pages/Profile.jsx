@@ -17,11 +17,19 @@ import {
   OutlinedInput,
   FormControl,
   InputLabel,
+  TextField,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { useState, useEffect } from "react";
 import { auth, db } from "../services/firestoreConfig";
-import { doc, getDoc, getDocs, collection, setDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  getDocs,
+  collection,
+  setDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import Navbar from "../components/NavBar";
 import { data } from "react-router-dom";
 
@@ -69,6 +77,9 @@ const Profile = () => {
   const [editYearOpen, setEditYearOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState("");
 
+  const [editExpOpen, setEditExpOpen] = useState(false);
+  const [experienceToEdit, setExperienceToEdit] = useState(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -100,7 +111,10 @@ const Profile = () => {
         const expSnap = await getDocs(
           collection(db, "students", user.uid, "experience")
         );
-        const expList = expSnap.docs.map((doc) => doc.data());
+        const expList = expSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         setExperience(expList);
 
         setLoading(false);
@@ -252,7 +266,17 @@ const Profile = () => {
                 <Typography>No experience added yet.</Typography>
               ) : (
                 experience.map((exp, idx) => (
-                  <Paper key={idx} sx={{ pt: 2, mb: 1 }}>
+                  <Paper key={idx} sx={{ pt: 2, mb: 1, position: "relative" }}>
+                    <IconButton
+                      size="small"
+                      sx={{ position: "absolute", top: 8, right: 8 }}
+                      onClick={() => {
+                        setExperienceToEdit({ ...exp, id: exp.id });
+                        setEditExpOpen(true);
+                      }}
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
                     <Typography fontWeight="bold">
                       {exp.jobTitle || "Job Title"}
                     </Typography>
@@ -399,6 +423,94 @@ const Profile = () => {
         <DialogActions>
           <Button onClick={() => setEditYearOpen(false)}>Cancel</Button>
           <Button onClick={saveYear} variant="contained">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={editExpOpen}
+        onClose={() => setEditExpOpen(false)}
+        fullWidth
+      >
+        <DialogTitle>Edit Work Experience</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Job Title"
+            margin="normal"
+            value={experienceToEdit?.jobTitle || ""}
+            onChange={(e) =>
+              setExperienceToEdit({
+                ...experienceToEdit,
+                jobTitle: e.target.value,
+              })
+            }
+          />
+          <TextField
+            fullWidth
+            label="Employer"
+            margin="normal"
+            value={experienceToEdit?.employer || ""}
+            onChange={(e) =>
+              setExperienceToEdit({
+                ...experienceToEdit,
+                employer: e.target.value,
+              })
+            }
+          />
+          <TextField
+            fullWidth
+            label="Start Date"
+            type="date"
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+            value={experienceToEdit?.start || ""}
+            onChange={(e) =>
+              setExperienceToEdit({
+                ...experienceToEdit,
+                start: e.target.value,
+              })
+            }
+          />
+          <TextField
+            fullWidth
+            label="End Date"
+            type="date"
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+            value={experienceToEdit?.end || ""}
+            onChange={(e) =>
+              setExperienceToEdit({ ...experienceToEdit, end: e.target.value })
+            }
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color="error"
+            onClick={async () => {
+              await deleteDoc(
+                doc(db, "students", user.uid, "experience", experienceToEdit.id)
+              );
+              setEditExpOpen(false);
+              window.location.reload();
+            }}
+          >
+            Delete
+          </Button>
+          <Button onClick={() => setEditExpOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={async () => {
+              const { id, ...data } = experienceToEdit;
+              await setDoc(
+                doc(db, "students", user.uid, "experience", id),
+                data,
+                { merge: true }
+              );
+              setEditExpOpen(false);
+              window.location.reload();
+            }}
+          >
             Save
           </Button>
         </DialogActions>
