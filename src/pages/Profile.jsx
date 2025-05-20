@@ -59,6 +59,10 @@ const Profile = () => {
   const [allTrades, setAllTrades] = useState([]);
   const [selectedTradeRefs, setSelectedTradeRefs] = useState([]);
 
+  const [editSkillsOpen, setEditSkillsOpen] = useState(false);
+  const [allSkills, setAllSkills] = useState([]);
+  const [selectedSkillRefs, setSelectedSkillRefs] = useState([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -115,7 +119,21 @@ const Profile = () => {
         console.error("Error fetching all trades: ", error);
       }
     };
+    const loadSkills = async () => {
+      try {
+        const snap = await getDocs(collection(db, "skills"));
+        const skills = snap.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().name,
+          ref: doc.ref,
+        }));
+        setAllSkills(skills);
+      } catch (error) {
+        console.error("Error fetching skills: ", error);
+      }
+    };
     loadTrades();
+    loadSkills();
   }, []);
 
   const openEditInterests = () => {
@@ -127,6 +145,18 @@ const Profile = () => {
     const studentRef = doc(db, "students", user.uid);
     await setDoc(studentRef, { interests: selectedTradeRefs }, { merge: true });
     setEditInterestsOpen(false);
+    window.location.reload();
+  };
+
+  const openEditSkills = () => {
+    setSelectedSkillRefs(studentData.skills || []);
+    setEditSkillsOpen(true);
+  };
+
+  const saveSkills = async () => {
+    const studentRef = doc(db, "students", user.uid);
+    await setDoc(studentRef, { skills: selectedSkillRefs }, { merge: true });
+    setEditSkillsOpen(false);
     window.location.reload();
   };
 
@@ -188,7 +218,7 @@ const Profile = () => {
                 ))}
               </Box>
             </Section>
-            <Section title="Skills">
+            <Section title="Skills" onEdit={openEditSkills}>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                 {skills.map((skill, idx) => (
                   <Chip
@@ -247,7 +277,17 @@ const Profile = () => {
                       (t) => t.ref.path === ref.path
                     );
                     return (
-                      <Chip key={ref.path} label={trade?.name || "Unknown"} />
+                      <Chip
+                        key={ref.path}
+                        label={trade?.name || "Unknown"}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onDelete={(e) => {
+                          e.stopPropagation();
+                          setSelectedTradeRefs((prev) =>
+                            prev.filter((r) => r.path !== ref.path)
+                          );
+                        }}
+                      />
                     );
                   })}
                 </Box>
@@ -264,6 +304,58 @@ const Profile = () => {
         <DialogActions>
           <Button onClick={() => setEditInterestsOpen(false)}>Cancel</Button>
           <Button onClick={saveInterests} variant="contained">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={editSkillsOpen}
+        onClose={() => setEditSkillsOpen(false)}
+        fullWidth
+      >
+        <DialogTitle>Edit Skills</DialogTitle>
+        <DialogContent>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Skills</InputLabel>
+            <Select
+              multiple
+              value={selectedSkillRefs}
+              onChange={(e) => setSelectedSkillRefs(e.target.value)}
+              input={<OutlinedInput label="Skills" />}
+              renderValue={(selected) => (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {selected.map((ref) => {
+                    const skill = allSkills.find(
+                      (s) => s.ref.path === ref.path
+                    );
+                    return (
+                      <Chip
+                        key={ref.path}
+                        label={skill?.name || "Unknown"}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onDelete={(e) => {
+                          e.stopPropagation();
+                          setSelectedSkillRefs((prev) =>
+                            prev.filter((r) => r.path !== ref.path)
+                          );
+                        }}
+                      />
+                    );
+                  })}
+                </Box>
+              )}
+            >
+              {allSkills.map((skill) => (
+                <MenuItem key={skill.id} value={skill.ref}>
+                  {skill.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditSkillsOpen(false)}>Cancel</Button>
+          <Button onClick={saveSkills} variant="contained">
             Save
           </Button>
         </DialogActions>
