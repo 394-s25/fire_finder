@@ -1,17 +1,36 @@
-import { describe, expect, test } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, test, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
 import App from "./App";
+import { UserProvider } from "./services/userProvider";
+import "@testing-library/jest-dom";
 
-describe("counter tests", () => {
-  test("Counter should be 0 at the start", () => {
-    render(<App />);
-    expect(screen.getByText("count is: 0")).toBeDefined();
+vi.mock("./services/userProvider", () => ({
+  useAuthContext: () => ({
+    user: {
+      uid: "test-user",
+      displayName: "Test User",
+      email: "test@test.com",
+    },
+    authLoading: false,
+  }),
+  UserProvider: ({ children }) => children,
+}));
+
+describe("Fire Finder Tests", () => {
+  test("App renders", () => {
+    render(
+      <UserProvider>
+        <App />
+      </UserProvider>
+    );
   });
 
-  test("Counter should increment by one when clicked", async () => {
-    render(<App />);
-    const counter = screen.getByRole("button");
-    fireEvent.click(counter);
-    expect(await screen.getByText("count is: 1")).toBeDefined();
+  test("Navbar shows 'Explore' title on home route", () => {
+    render(
+      <UserProvider>
+        <App />
+      </UserProvider>
+    );
+    expect(screen.getByText("Explore")).toBeInTheDocument();
   });
 });
