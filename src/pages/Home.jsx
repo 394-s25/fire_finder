@@ -101,7 +101,6 @@ const Home = () => {
       }
       return 0;
     });
-  console.log(filteredPosts);
 
   return (
     <>
@@ -121,7 +120,7 @@ const Home = () => {
           <Paper elevation={1} sx={{ mb: 2, p: 1.5, borderRadius: 2 }}>
             <Tabs
               value={tab}
-              onChange={(e) => setTab(e.target.value)}
+              onChange={(e, newValue) => setTab(newValue)}
               centered
               indicatorColor="primary"
               textColor="primary"

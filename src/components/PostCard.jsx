@@ -18,7 +18,6 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../services/firestoreConfig";
 
 const PostCard = ({ post }) => {
-  console.log(post);
   const { user } = useAuthContext();
 
   const [liked, setLiked] = useState(false);
