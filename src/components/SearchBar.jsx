@@ -16,9 +16,11 @@ const StyledInput = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const SearchBar = () => {
+const SearchBar = ({ value, onChange }) => {
   return (
     <StyledInput
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
       placeholder="Search"
       sx={{
         bgcolor: "transparent",
@@ -33,4 +35,3 @@ const SearchBar = () => {
 };
 
 export default SearchBar;
-
