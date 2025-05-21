@@ -16,10 +16,18 @@ const Events = () => {
     const fetchEvents = async () => {
       try {
         const snapshot = await getDocs(collection(db, "events"));
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const data = snapshot.docs.map((doc) => {
+          const d = doc.data();
+          return {
+            id: doc.id,
+            title: d.title,
+            description: d.description,
+            location: d.location,
+            imageUrl: d.imageUrl,
+            startDate: d.startDate?.toDate(),
+            endDate: d.endDate?.toDate(),
+          };
+        });
         setEvents(data);
       } catch (error) {
         console.error("Failed to fetch events: ", error);
@@ -59,10 +67,13 @@ const Events = () => {
           {events.map((event) => (
             <div key={event.id} style={{ marginBottom: "0.5rem" }}>
               <EventCard
+                id={event.id}
                 title={event.title}
-                date={event.date}
                 description={event.description}
+                location={event.location}
                 image={event.imageUrl}
+                startDate={event.startDate}
+                endDate={event.endDate}
               />
             </div>
           ))}
