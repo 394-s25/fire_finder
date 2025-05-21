@@ -1,14 +1,54 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../components/NavBar";
 import ProfileCard from "../components/ProfileCard";
 import NewPostModal from "../components/NewPost";
-import PostsTabs from "../components/PostsTabs";
-import SortDropdown from "../components/SortDropdown";
 import PostCard from "../components/PostCard";
-import SearchBar from "../components/HomeSearch";
 import { useAuthContext } from "../services/userProvider";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db } from "../services/firestoreConfig";
+import {
+  Box,
+  Typography,
+  InputBase,
+  styled,
+  Select,
+  MenuItem,
+  Tabs,
+  Tab,
+  Paper,
+} from "@mui/material";
+
+const StyledInput = styled(InputBase)(({ theme }) => ({
+  "& .MuiInputBase-input": {
+    borderRadius: "25px",
+    backgroundColor: "transparent",
+    border: "1px solid #ddd",
+    fontSize: 14,
+    padding: "5px 15px",
+    transition: theme.transitions.create(["border-color", "box-shadow"]),
+    "&:focus": {
+      borderColor: "#ddd",
+      boxShadow: "0 0 0 0.2rem rgba(0,0,0,0.05)",
+    },
+  },
+}));
+
+const MinimalInput = styled(InputBase)(({ theme }) => ({
+  "& .MuiInputBase-input": {
+    fontSize: 14,
+    padding: "5px 26px 5px 12px",
+    color: "inherit",
+    width: "100px",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    "&:focus": {
+      backgroundColor: "transparent",
+    },
+  },
+  "& .MuiSelect-icon": {
+    color: "inherit",
+  },
+}));
 
 const Home = () => {
   const [tab, setTab] = useState(0);
@@ -66,24 +106,68 @@ const Home = () => {
   return (
     <>
       <Navbar />
-      <ProfileCard />
-      <NewPostModal />
-      <div
-        style={{
-          marginLeft: "340px",
-          marginRight: "40px",
-          paddingTop: "120px",
-        }}
-      >
-        <PostsTabs value={tab} setValue={setTab} />
-        <SearchBar value={search} onChange={setSearch} />
-        <SortDropdown value={sortOption} onChange={setSortOption} />
-        <div style={{ marginTop: "100px" }}>
-          {filteredPosts.map((post) => (
-            <PostCard post={post} />
-          ))}
-        </div>
-      </div>
+      <Box display="flex" justifyContent="center" mt={10} px={2}>
+        <Box
+          flex={1}
+          maxWidth="300px"
+          display={{ xs: "none", md: "block" }}
+          mr={2}
+        >
+          <ProfileCard />
+          <NewPostModal />
+        </Box>
+
+        <Box flex={2} maxWidth="700px">
+          <Paper elevation={1} sx={{ mb: 2, p: 1.5, borderRadius: 2 }}>
+            <Tabs
+              value={tab}
+              onChange={(e) => setTab(e.target.value)}
+              centered
+              indicatorColor="primary"
+              textColor="primary"
+              sx={{
+                minHeight: "36px",
+                "& .MuiTab-root": {
+                  minHeight: "36px",
+                  padding: "6px 12px",
+                  fontFamily: '"Times New Roman", Georgia, serif',
+                  fontSize: { xs: "0.5rem", sm: ".8rem", md: ".8rem" },
+                },
+              }}
+            >
+              <Tab label="Feed" />
+              <Tab label="Saved" />
+            </Tabs>
+            <Box display="flex" alignItems="center" gap={2} mt={2}>
+              <StyledInput
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search"
+                sx={{ flex: 1 }}
+              />
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography variant="body2" sx={{ color: "gray" }}>
+                  Sort:
+                </Typography>
+                <Select
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                  input={<MinimalInput />}
+                >
+                  <MenuItem value="Popular">Popular</MenuItem>
+                  <MenuItem value="Recent">Date</MenuItem>
+                  <MenuItem value="Most Liked">Newest</MenuItem>
+                </Select>
+              </Box>
+            </Box>
+          </Paper>
+          <Box>
+            {filteredPosts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </Box>
+        </Box>
+      </Box>
     </>
   );
 };

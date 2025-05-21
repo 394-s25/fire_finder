@@ -71,9 +71,6 @@ const PostCard = ({ post }) => {
         borderRadius: 2,
         width: "100%",
         maxWidth: "700px",
-        top: "200px",
-        left: "300px",
-        position: "relative",
         zIndex: -1,
       }}
     >
@@ -106,7 +103,6 @@ const PostCard = ({ post }) => {
         <Box
           sx={{
             display: "flex",
-            top: "140px",
             overflowX: "auto",
             "&::-webkit-scrollbar": {
               height: "8px",
