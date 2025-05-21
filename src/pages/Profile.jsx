@@ -60,7 +60,7 @@ function Section({ title, children, onEdit }) {
 }
 
 const Profile = () => {
-  const { user } = useAuthContext();
+  const { user, logout } = useAuthContext();
   const [studentData, setStudentData] = useState(null);
   const [interests, setInterests] = useState([]);
   const [skills, setSkills] = useState([]);
@@ -313,6 +313,11 @@ const Profile = () => {
                 + Add Work Experience
               </Button>
             </Section>
+            <Box sx={{ textAlign: "center", mt: 4 }}>
+              <Button variant="outlined" color="error" onClick={logout}>
+                Log Out
+              </Button>
+            </Box>
           </Box>
         </Box>
       </Box>
