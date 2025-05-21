@@ -60,7 +60,7 @@ function Section({ title, children, onEdit }) {
 }
 
 const Profile = () => {
-  const user = useAuthContext();
+  const { user } = useAuthContext();
   const [studentData, setStudentData] = useState(null);
   const [interests, setInterests] = useState([]);
   const [skills, setSkills] = useState([]);

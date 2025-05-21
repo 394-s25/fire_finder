@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../components/NavBar";
-import { Box, Tabs, Tab, Typography, Grid } from "@mui/material";
-import ClassCard from "../components/ClassCard";
+import { Box, Tabs, Tab } from "@mui/material";
 import TrainingCard from "../components/TrainingCard";
 import TradeCard from "../components/TradeCard";
 import ContactCard from "../components/ContactCard";
 import ResourcesTab from "../components/ResourcesTab";
 import { doc, collection, getDoc, getDocs } from "firebase/firestore";
-import { auth, db } from "../services/firestoreConfig";
+import { db } from "../services/firestoreConfig";
+import { useAuthContext } from "../services/userProvider";
 
 function TabPanel({ children, value, index }) {
   return (
@@ -18,7 +18,7 @@ function TabPanel({ children, value, index }) {
 }
 
 const Resources = () => {
-  const user = auth.currentUser;
+  const { user } = useAuthContext();
   const [tab, setTab] = useState(0);
   const [contacts, setContacts] = useState([]);
   const [trades, setTrades] = useState([]);
