@@ -13,6 +13,7 @@ import Events from "./pages/Events";
 import LoginPage from "./pages/Login";
 import SignupPage from "./pages/Signup";
 import OnboardingForm from "./pages/Onboarding";
+import Admin from "./pages/Admin";
 
 const App = () => {
   const PrivateRoute = ({ children }) => {
@@ -55,6 +56,14 @@ const App = () => {
           element={
             <PrivateRoute>
               <Events />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <Admin />
             </PrivateRoute>
           }
         />

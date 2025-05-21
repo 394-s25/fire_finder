@@ -11,7 +11,8 @@ import {
   setPersistence,
   browserLocalPersistence,
 } from "firebase/auth";
-import { auth, googleProvider } from "./firestoreConfig";
+import { auth, db, googleProvider } from "./firestoreConfig";
+import { doc, getDoc } from "firebase/firestore";
 
 const AuthContext = createContext(undefined);
 
@@ -32,9 +33,16 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
+    const unsubscribe = onAuthStateChanged(auth, async (u) => {
       console.log("Auth state changed:", u ? `User ${u.uid}` : "No user");
       setUser(u);
+      if (u) {
+        const studentDoc = await getDoc(doc(db, "students", u.uid));
+        setUser({
+          ...u,
+          isAdmin: studentDoc.exists() && studentDoc.data().isAdmin,
+        });
+      }
       setAuthLoading(false);
     });
     return unsubscribe;

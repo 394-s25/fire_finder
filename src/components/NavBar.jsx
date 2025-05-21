@@ -16,10 +16,13 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import LocalActivityOutlinedIcon from "@mui/icons-material/LocalActivityOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { useNavigate, useLocation } from "react-router-dom";
 import Flogo from "../imgs/Flogo.png";
+import { useAuthContext } from "../services/userProvider";
 
 const Navbar = () => {
+  const { user } = useAuthContext();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const togglePanel = () => {
@@ -33,7 +36,9 @@ const Navbar = () => {
     "/profile": "Profile",
     "/resources": "Resources",
     "/events": "Events",
+    "/admin": "Admin",
   };
+
   const handleNavigation = (path) => {
     navigate(path);
     togglePanel(); // Close the panel after navigation
@@ -59,18 +64,6 @@ const Navbar = () => {
               alignItems: "flex-middle",
             }}
           >
-            {/* <Typography
-              variant="h8"
-              sx={{
-                color: '#DC2626',
-                fontWeight: 'bold',
-                fontFamily: '"Times New Roman", Georgia, serif',
-                marginTop: 1,
-                fontSize: { xs: '0.875rem', sm: '1rem', md: '1.125rem' },
-              }}
-            >
-              FireFinder
-            </Typography> */}
             <Box
               component="img"
               src={Flogo}
@@ -232,6 +225,34 @@ const Navbar = () => {
               />
             </>
           </ListItem>
+          {user?.isAdmin && (
+            <ListItem
+              button
+              onClick={() => handleNavigation("/admin")}
+              sx={{
+                flexDirection: "column",
+                alignItems: "center",
+                backgroundColor:
+                  location.pathname === "/admin" ? "#FEE2E2" : "transparent",
+              }}
+            >
+              <>
+                <AdminPanelSettingsIcon
+                  sx={{
+                    color: "#DC2626",
+                    fontsize: { xs: "20px", sm: "24px", md: "24px" },
+                  }}
+                />
+                <ListItemText
+                  primary="Admin"
+                  sx={{
+                    color: "#DC2626",
+                    fontsize: { xs: "8px", sm: "10px", md: "10px" },
+                  }}
+                />
+              </>
+            </ListItem>
+          )}
         </List>
       </Drawer>
     </>
