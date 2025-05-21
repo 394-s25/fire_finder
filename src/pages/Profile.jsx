@@ -18,6 +18,8 @@ import {
   FormControl,
   InputLabel,
   TextField,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { useState, useEffect } from "react";
@@ -31,7 +33,6 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import Navbar from "../components/NavBar";
-import { data } from "react-router-dom";
 import { useAuthContext } from "../services/userProvider";
 
 const schoolYears = ["9th Grade", "10th Grade", "11th Grade", "12th Grade"];
@@ -59,13 +60,31 @@ function Section({ title, children, onEdit }) {
   );
 }
 
+// TabPanel component to handle tab content
+function TabPanel({ children, value, index, ...other }) {
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`profile-tabpanel-${index}`}
+      aria-labelledby={`profile-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
+    </div>
+  );
+}
+
 const Profile = () => {
-  const user = useAuthContext();
+  const { user } = useAuthContext();
   const [studentData, setStudentData] = useState(null);
   const [interests, setInterests] = useState([]);
   const [skills, setSkills] = useState([]);
   const [experience, setExperience] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Tab state
+  const [tabValue, setTabValue] = useState(0);
 
   const [editInterestsOpen, setEditInterestsOpen] = useState(false);
   const [allTrades, setAllTrades] = useState([]);
@@ -80,6 +99,11 @@ const Profile = () => {
 
   const [editExpOpen, setEditExpOpen] = useState(false);
   const [experienceToEdit, setExperienceToEdit] = useState(null);
+
+  // Handle tab change
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -127,6 +151,7 @@ const Profile = () => {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching student data: ", error);
+        setLoading(false);
       }
     };
     fetchData();
@@ -161,8 +186,12 @@ const Profile = () => {
     };
     loadTrades();
     loadSkills();
-    setSelectedYear(data.year || "");
-  }, []);
+
+    // Only set selectedYear when studentData is available
+    if (studentData) {
+      setSelectedYear(studentData.year || "");
+    }
+  }, [studentData]);
 
   const openEditInterests = () => {
     setSelectedTradeRefs(studentData.interests || []);
@@ -170,10 +199,33 @@ const Profile = () => {
   };
 
   const saveInterests = async () => {
-    const studentRef = doc(db, "students", user.uid);
-    await setDoc(studentRef, { interests: selectedTradeRefs }, { merge: true });
-    setEditInterestsOpen(false);
-    window.location.reload();
+    try {
+      const studentRef = doc(db, "students", user.uid);
+      await setDoc(
+        studentRef,
+        { interests: selectedTradeRefs },
+        { merge: true }
+      );
+
+      // Update state directly
+      setStudentData({
+        ...studentData,
+        interests: selectedTradeRefs,
+      });
+
+      // Refresh the interests display
+      const trades = await Promise.all(
+        selectedTradeRefs.map(async (ref) => {
+          const docSnap = await getDoc(ref);
+          return docSnap.exists() ? docSnap.data().name : "(Unknown)";
+        })
+      );
+      setInterests(trades);
+      setEditInterestsOpen(false);
+    } catch (error) {
+      console.error("Error saving interests:", error);
+      alert("Failed to save interests: " + error.message);
+    }
   };
 
   const openEditSkills = () => {
@@ -182,17 +234,46 @@ const Profile = () => {
   };
 
   const saveSkills = async () => {
-    const studentRef = doc(db, "students", user.uid);
-    await setDoc(studentRef, { skills: selectedSkillRefs }, { merge: true });
-    setEditSkillsOpen(false);
-    window.location.reload();
+    try {
+      const studentRef = doc(db, "students", user.uid);
+      await setDoc(studentRef, { skills: selectedSkillRefs }, { merge: true });
+
+      // Update state directly
+      setStudentData({
+        ...studentData,
+        skills: selectedSkillRefs,
+      });
+
+      // Refresh skills display
+      const skillNames = await Promise.all(
+        selectedSkillRefs.map(async (ref) => {
+          const docSnap = await getDoc(ref);
+          return docSnap.exists() ? docSnap.data().name : "(Unknown)";
+        })
+      );
+      setSkills(skillNames);
+      setEditSkillsOpen(false);
+    } catch (error) {
+      console.error("Error saving skills:", error);
+      alert("Failed to save skills: " + error.message);
+    }
   };
 
   const saveYear = async () => {
-    const studentRef = doc(db, "students", user.uid);
-    await setDoc(studentRef, { year: selectedYear }, { merge: true });
-    setEditYearOpen(false);
-    window.location.reload();
+    try {
+      const studentRef = doc(db, "students", user.uid);
+      await setDoc(studentRef, { year: selectedYear }, { merge: true });
+
+      // Update state directly
+      setStudentData({
+        ...studentData,
+        year: selectedYear,
+      });
+      setEditYearOpen(false);
+    } catch (error) {
+      console.error("Error saving school year:", error);
+      alert("Failed to save school year: " + error.message);
+    }
   };
 
   if (loading) {
@@ -240,82 +321,133 @@ const Profile = () => {
               <Typography>0 Following, 0 Followers</Typography>
             </Box>
           </Box>
-          <Box sx={{ mt: 4, display: "flex", flexDirection: "column", gap: 3 }}>
-            <Section title="Interested In" onEdit={openEditInterests}>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {interests.map((trade, idx) => (
-                  <Chip
-                    key={idx}
-                    label={trade}
-                    variant="outlined"
-                    color="primary"
-                  />
-                ))}
-              </Box>
-            </Section>
-            <Section title="Skills" onEdit={openEditSkills}>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {skills.map((skill, idx) => (
-                  <Chip
-                    key={idx}
-                    label={skill}
-                    variant="outlined"
-                    color="secondary"
-                  />
-                ))}
-              </Box>
-            </Section>
-            <Section title="School Year" onEdit={() => setEditYearOpen(true)}>
-              <Typography>{studentData?.year || "Not specified"}</Typography>
-            </Section>
-            <Section title="Work Experience">
-              {experience.length === 0 ? (
-                <Typography>No experience added yet.</Typography>
-              ) : (
-                experience.map((exp, idx) => (
-                  <Paper key={idx} sx={{ pt: 2, mb: 1, position: "relative" }}>
-                    <IconButton
-                      size="small"
-                      sx={{ position: "absolute", top: 8, right: 8 }}
-                      onClick={() => {
-                        setExperienceToEdit({ ...exp, id: exp.id });
-                        setEditExpOpen(true);
-                      }}
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <Typography fontWeight="bold">
-                      {exp.jobTitle || "Job Title"}
-                    </Typography>
-                    <Typography>{exp.employer}</Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{ color: "text.secondary" }}
-                    >
-                      {exp.start || "Start"} - {exp.end || "Present"}
-                    </Typography>
-                  </Paper>
-                ))
-              )}
-              <Button
-                variant="outlined"
-                sx={{ mt: 2 }}
-                onClick={() => {
-                  setExperienceToEdit({
-                    jobTitle: "",
-                    employer: "",
-                    start: "",
-                    end: "",
-                  });
-                  setEditExpOpen(true);
-                }}
-              >
-                + Add Work Experience
-              </Button>
-            </Section>
+
+          {/* Tabs */}
+          <Box sx={{ mt: 2, borderBottom: 1, borderColor: "divider" }}>
+            <Tabs
+              value={tabValue}
+              onChange={handleTabChange}
+              aria-label="profile tabs"
+              variant="fullWidth"
+            >
+              <Tab
+                label="About"
+                id="profile-tab-0"
+                aria-controls="profile-tabpanel-0"
+              />
+              <Tab
+                label="Saved Events"
+                id="profile-tab-1"
+                aria-controls="profile-tabpanel-1"
+              />
+            </Tabs>
           </Box>
+
+          {/* About Tab */}
+          <TabPanel value={tabValue} index={0}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              <Section title="Interested In" onEdit={openEditInterests}>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                  {interests.length > 0 ? (
+                    interests.map((trade, idx) => (
+                      <Chip
+                        key={idx}
+                        label={trade}
+                        variant="outlined"
+                        color="primary"
+                      />
+                    ))
+                  ) : (
+                    <Typography>
+                      No interests added yet. Click the edit button to add some.
+                    </Typography>
+                  )}
+                </Box>
+              </Section>
+              <Section title="Skills" onEdit={openEditSkills}>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                  {skills.length > 0 ? (
+                    skills.map((skill, idx) => (
+                      <Chip
+                        key={idx}
+                        label={skill}
+                        variant="outlined"
+                        color="secondary"
+                      />
+                    ))
+                  ) : (
+                    <Typography>
+                      No skills added yet. Click the edit button to add some.
+                    </Typography>
+                  )}
+                </Box>
+              </Section>
+              <Section title="School Year" onEdit={() => setEditYearOpen(true)}>
+                <Typography>{studentData?.year || "Not specified"}</Typography>
+              </Section>
+              <Section title="Work Experience">
+                {experience.length === 0 ? (
+                  <Typography>No experience added yet.</Typography>
+                ) : (
+                  experience.map((exp, idx) => (
+                    <Paper
+                      key={idx}
+                      sx={{ pt: 2, mb: 1, position: "relative" }}
+                    >
+                      <IconButton
+                        size="small"
+                        sx={{ position: "absolute", top: 8, right: 8 }}
+                        onClick={() => {
+                          setExperienceToEdit({ ...exp, id: exp.id });
+                          setEditExpOpen(true);
+                        }}
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <Typography fontWeight="bold">
+                        {exp.jobTitle || "Job Title"}
+                      </Typography>
+                      <Typography>{exp.employer}</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "text.secondary" }}
+                      >
+                        {exp.start || "Start"} - {exp.end || "Present"}
+                      </Typography>
+                    </Paper>
+                  ))
+                )}
+                <Button
+                  variant="outlined"
+                  sx={{ mt: 2 }}
+                  onClick={() => {
+                    setExperienceToEdit({
+                      jobTitle: "",
+                      employer: "",
+                      start: "",
+                      end: "",
+                    });
+                    setEditExpOpen(true);
+                  }}
+                >
+                  + Add Work Experience
+                </Button>
+              </Section>
+            </Box>
+          </TabPanel>
+
+          {/* Saved Events Tab */}
+          <TabPanel value={tabValue} index={1}>
+            <Box sx={{ py: 3, textAlign: "center" }}>
+              <Typography variant="body1">
+                You don't have any saved events yet.
+              </Typography>
+            </Box>
+          </TabPanel>
         </Box>
       </Box>
+
+      {/* Dialog components remain the same */}
       <Dialog
         open={editInterestsOpen}
         onClose={() => setEditInterestsOpen(false)}
@@ -368,6 +500,8 @@ const Profile = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Other dialogs remain the same */}
       <Dialog
         open={editSkillsOpen}
         onClose={() => setEditSkillsOpen(false)}
@@ -420,6 +554,7 @@ const Profile = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
       <Dialog
         open={editYearOpen}
         onClose={() => setEditYearOpen(false)}
@@ -449,6 +584,7 @@ const Profile = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
       <Dialog
         open={editExpOpen}
         onClose={() => setEditExpOpen(false)}
@@ -515,17 +651,26 @@ const Profile = () => {
             <Button
               color="error"
               onClick={async () => {
-                await deleteDoc(
-                  doc(
-                    db,
-                    "students",
-                    user.uid,
-                    "experience",
-                    experienceToEdit.id
-                  )
-                );
-                setEditExpOpen(false);
-                window.location.reload();
+                try {
+                  await deleteDoc(
+                    doc(
+                      db,
+                      "students",
+                      user.uid,
+                      "experience",
+                      experienceToEdit.id
+                    )
+                  );
+
+                  // Update state instead of reloading
+                  setExperience(
+                    experience.filter((exp) => exp.id !== experienceToEdit.id)
+                  );
+                  setEditExpOpen(false);
+                } catch (error) {
+                  console.error("Error deleting experience:", error);
+                  alert("Failed to delete experience: " + error.message);
+                }
               }}
             >
               Delete
@@ -535,13 +680,33 @@ const Profile = () => {
           <Button
             variant="contained"
             onClick={async () => {
-              const { id, ...data } = experienceToEdit;
-              const expRef = id
-                ? doc(db, "students", user.uid, "experience", id)
-                : doc(collection(db, "students", user.uid, "experience"));
-              await setDoc(expRef, data, { merge: true });
-              setEditExpOpen(false);
-              window.location.reload();
+              try {
+                const { id, ...data } = experienceToEdit;
+                const expRef = id
+                  ? doc(db, "students", user.uid, "experience", id)
+                  : doc(collection(db, "students", user.uid, "experience"));
+
+                await setDoc(expRef, data, { merge: true });
+
+                // Update state instead of reloading
+                if (id) {
+                  // If editing existing, update it
+                  setExperience(
+                    experience.map((exp) =>
+                      exp.id === id ? { id, ...data } : exp
+                    )
+                  );
+                } else {
+                  // If adding new, add to list with new ID
+                  const newId = expRef.id;
+                  setExperience([...experience, { id: newId, ...data }]);
+                }
+
+                setEditExpOpen(false);
+              } catch (error) {
+                console.error("Error saving experience:", error);
+                alert("Failed to save experience: " + error.message);
+              }
             }}
           >
             Save

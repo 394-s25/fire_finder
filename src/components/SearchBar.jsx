@@ -20,17 +20,13 @@ const SearchBar = () => {
   return (
     <StyledInput
       placeholder="Search"
+      fullWidth
       sx={{
         bgcolor: "transparent",
-        position: "fixed",
-        top: { xs: "260px", sm: "190px", md: "95px" },
-        left: { xs: "10px", sm: "15px", md: "1220px" },
-        width: { xs: "90%", sm: "80%", md: "15%" },
-        bottompadding: "15px",
+        width: "100%",
       }}
     />
   );
 };
 
 export default SearchBar;
-
