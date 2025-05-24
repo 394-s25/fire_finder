@@ -15,7 +15,7 @@ const PostModal = ({ open, onClose }) => {
     setSelectedFiles((prevFiles) => [...prevFiles, ...files]);
     setImagePreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
   };
-
+  
   const removeFile = (index) => {
     const newFiles = selectedFiles.filter((_, i) => i !== index);
     const newPreviews = imagePreviews.filter((_, i) => i !== index);

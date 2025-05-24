@@ -13,11 +13,11 @@ const NewPostModal = () => {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [isPollModalOpen, setIsPollModalOpen] = useState(false);
-
+  
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
   };
-
+  
   const openPostModal = () => {
     setIsPostModalOpen(true);
   };

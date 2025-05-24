@@ -57,7 +57,7 @@ const Home = () => {
   const [sortOption, setSortOption] = useState("Recent");
   const [search, setSearch] = useState("");
   const { user } = useAuthContext();
-
+  
   useEffect(() => {
     const fetchPosts = async () => {
       const querySnapshot = await getDocs(collection(db, "posts"));
@@ -101,21 +101,21 @@ const Home = () => {
       }
       return 0;
     });
-
+    
   return (
     <>
       <Navbar />
-      <Box display="flex" justifyContent="center" mt={10} px={2}>
+      <Box display="flex" justifyContent="start" mt={10} px={2}>
         <Box
           flex={1}
           maxWidth="300px"
           display={{ xs: "none", md: "block" }}
-          mr={2}
+          mr={5}
         >
           <ProfileCard />
           <NewPostModal />
         </Box>
-
+        
         <Box flex={2} maxWidth="700px">
           <Paper elevation={1} sx={{ mb: 2, p: 1.5, borderRadius: 2 }}>
             <Tabs

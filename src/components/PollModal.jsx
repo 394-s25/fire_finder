@@ -46,7 +46,7 @@ const PollModal = ({ open, onClose }) => {
         onClose();
         }
     };
-
+    
     return (
         <Modal open={open} onClose={onClose}>
         <Box

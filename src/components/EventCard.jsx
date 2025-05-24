@@ -8,6 +8,7 @@ import { useAuthContext } from "../services/userProvider";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { Button } from "@mui/material";
 import { db } from "../services/firestoreConfig";
+import EventDetails from "./EventDetails";
 
 const EventCard = ({
   id,
@@ -21,6 +22,7 @@ const EventCard = ({
   const { user } = useAuthContext();
   const [isSaved, setIsSaved] = useState(false);
   const [isRSVPd, setIsRSVPd] = useState(false);
+  const [isEventOpen, setIsEventOpen] = useState(false);
 
   const studentRef = doc(db, "students", user.uid);
   const eventRef = doc(db, "events", id);
@@ -88,172 +90,191 @@ const EventCard = ({
     setIsSaved(!alreadyRSVPd);
   };
 
-  return (
-    <Card className="mb-6 rounded-lg overflow-hidden">
-      <CardActionArea sx={{ display: "flex", alignItems: "flex-start" }}>
-        <div
-          style={{
-            width: "15rem",
-            height: "15rem",
-            flexShrink: 0,
-            overflow: "hidden",
-            borderRadius: "0.375rem",
-          }}
-        >
-          <img
-            src={image}
-            alt={`${title} image`}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "fill",
-              display: "block",
-            }}
-          />
-        </div>
+  const openEvent = () => {
+    setIsEventOpen(true);
+  };
 
-        <div
-          style={{
-            marginLeft: "0.75rem",
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            textAlign: "left",
-          }}
-        >
-          <div style={{ marginBottom: "0.5rem" }}>
-            <h3 style={{ fontSize: "1.125rem", fontWeight: 500 }}>{title}</h3>
-            <p
+  const closeEvent = () => {
+    setIsEventOpen(false);
+  };
+
+  return (
+    <>
+      <Card className="mb-6 rounded-lg overflow-hidden">
+        <CardActionArea sx={{ display: "flex", alignItems: "flex-start" }} onClick={openEvent}>
+          <div
+            style={{
+              width: "16.5rem",
+              height: "15rem",
+              flexShrink: 0,
+              overflow: "hidden",
+              borderRadius: "0.375rem",
+            }}
+          >
+            <img
+              src={image}
+              alt={`${title} image`}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "fill",
+                display: "block",
+              }}
+            />
+          </div>
+          <div
+            style={{
+              marginLeft: "0.75rem",
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              textAlign: "left",
+              padding: "1rem",
+            }}
+          >
+            <div style={{ marginBottom: "0.5rem" }}>
+              <h3 style={{ fontSize: "1.125rem", fontWeight: 500 }}>{title}</h3>
+              <p
+                style={{
+                  fontSize: "0.875rem",
+                  color: "#6b7280",
+                  marginTop: "-0.5rem",
+                }}
+              >
+                {startDate?.toLocaleDateString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}{" "}
+                -{" "}
+                {endDate?.toLocaleDateString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
+            <div
               style={{
                 fontSize: "0.875rem",
-                color: "#6b7280",
+                color: "#4b5563",
+                marginBottom: "0.75rem",
                 marginTop: "-0.5rem",
               }}
             >
-              {startDate?.toLocaleDateString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}{" "}
-              -{" "}
-              {endDate?.toLocaleDateString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </p>
-          </div>
-
-          <div
-            style={{
-              fontSize: "0.875rem",
-              color: "#4b5563",
-              marginBottom: "0.75rem",
-              marginTop: "-0.5rem",
-            }}
-          >
-            {location}
-          </div>
-
-          <div
-            style={{
-              fontSize: "0.875rem",
-              color: "#4b5563",
-              marginBottom: "0.75rem",
-              marginTop: "-0.5rem",
-            }}
-          >
-            {description.split("\n").map((line, index) => (
-              <p key={index} style={{ margin: 0 }}>
-                {line}
-              </p>
-            ))}
-          </div>
-
-          <div style={{ flexGrow: 5 }} />
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              paddingBottom: "0.5rem",
-              paddingRight: "0.5rem",
-              paddingLeft: "0.5rem",
-            }}
-          >
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={isRSVPd}
-                  onChange={toggleRSVP}
-                  sx={{
-                    color: "#f97316",
-                    "&.Mui-checked": { color: "#f97316" },
-                    padding: "4px",
-                  }}
-                />
-              }
-              label="RSVP"
-              sx={{
-                border: "1px solid #f97316",
-                borderRadius: "0.25rem",
-                padding: "0 8px",
-                margin: 0,
-                color: "#f97316",
-                "&:hover": {
-                  backgroundColor: "rgba(249, 115, 22, 0.05)",
-                },
+              {location}
+            </div>
+            <div
+              style={{
+                fontSize: "0.875rem",
+                color: "#4b5563",
+                marginBottom: "0.75rem",
+                marginTop: "-0.5rem",
               }}
-            />
-
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={isSaved}
-                  onChange={toggleSave}
-                  sx={{
-                    color: "#f97316",
-                    "&.Mui-checked": { color: "#f97316" },
-                    padding: "4px",
-                  }}
-                />
-              }
-              label="Save"
-              sx={{
-                border: "1px solid #f97316",
-                borderRadius: "0.25rem",
-                padding: "0 8px",
-                margin: 0,
-                color: "#f97316",
-                "&:hover": {
-                  backgroundColor: "rgba(249, 115, 22, 0.05)",
-                },
+            >
+              {description.split("\n").map((line, index) => (
+                <p key={index} style={{ margin: 0 }}>
+                  {line}
+                </p>
+              ))}
+            </div>
+            <div style={{ flexGrow: 5 }} />
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                paddingBottom: "0.5rem",
+                paddingRight: "0.5rem",
+                paddingLeft: "0.5rem",
               }}
-            />
-
-            {isRSVPd && (
-              <a
-                href={getGoogleCalendarUrl({
-                  title,
-                  description,
-                  startDate,
-                  endDate,
-                  location,
-                })}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button
-                  size="small"
-                  variant="outlined"
-                  sx={{ borderColor: "#f97316", color: "#f97316" }}
+            >
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={isRSVPd}
+                    onChange={toggleRSVP}
+                    sx={{
+                      color: "#f97316",
+                      "&.Mui-checked": { color: "#f97316" },
+                      padding: "4px",
+                    }}
+                  />
+                }
+                label="RSVP"
+                sx={{
+                  border: "1px solid #f97316",
+                  borderRadius: "0.25rem",
+                  padding: "0 8px",
+                  margin: 0,
+                  color: "#f97316",
+                  "&:hover": {
+                    backgroundColor: "rgba(249, 115, 22, 0.05)",
+                  },
+                }}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={isSaved}
+                    onChange={toggleSave}
+                    sx={{
+                      color: "#f97316",
+                      "&.Mui-checked": { color: "#f97316" },
+                      padding: "4px",
+                    }}
+                  />
+                }
+                label="Save"
+                sx={{
+                  border: "1px solid #f97316",
+                  borderRadius: "0.25rem",
+                  padding: "0 8px",
+                  margin: 0,
+                  color: "#f97316",
+                  "&:hover": {
+                    backgroundColor: "rgba(249, 115, 22, 0.05)",
+                  },
+                }}
+              />
+              {isRSVPd && (
+                <a
+                  href={getGoogleCalendarUrl({
+                    title,
+                    description,
+                    startDate,
+                    endDate,
+                    location,
+                  })}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  Add to Calendar
-                </Button>
-              </a>
-            )}
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    sx={{ borderColor: "#f97316", color: "#f97316" }}
+                  >
+                    Add to Calendar
+                  </Button>
+                </a>
+              )}
+            </div>
           </div>
-        </div>
-      </CardActionArea>
-    </Card>
+        </CardActionArea>
+      </Card>
+      <EventDetails
+        open={isEventOpen}
+        onClose={closeEvent}
+        title={title}
+        description={description}
+        image={image}
+        location={location}
+        startDate={startDate}
+        endDate={endDate}
+        isSaved={isSaved}
+        isRSVPd={isRSVPd}
+        toggleSave={toggleSave}
+        toggleRSVP={toggleRSVP}
+        getGoogleCalendarUrl={getGoogleCalendarUrl}
+      />
+    </>
   );
 };
 
