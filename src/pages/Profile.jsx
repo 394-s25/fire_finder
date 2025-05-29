@@ -81,6 +81,42 @@ const Profile = () => {
   const [editExpOpen, setEditExpOpen] = useState(false);
   const [experienceToEdit, setExperienceToEdit] = useState(null);
 
+  const fetchTradeNames = async (tradeRefs) => {
+    if (!tradeRefs || tradeRefs.length === 0) return [];
+
+    const trades = await Promise.all(
+      tradeRefs.map(async (ref) => {
+        const docSnap = await getDoc(ref);
+        return docSnap.exists() ? docSnap.data().name : "(Unknown)";
+      })
+    );
+    return trades;
+  };
+
+  const fetchSkillNames = async (skillRefs) => {
+    if (!skillRefs || skillRefs.length === 0) return [];
+
+    const skillNames = await Promise.all(
+      skillRefs.map(async (ref) => {
+        const docSnap = await getDoc(ref);
+        return docSnap.exists() ? docSnap.data().name : "(Unknown)";
+      })
+    );
+    return skillNames;
+  };
+
+  const fetchExperience = async () => {
+    if (!user) return [];
+
+    const expSnap = await getDocs(
+      collection(db, "students", user.uid, "experience")
+    );
+    return expSnap.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -99,29 +135,13 @@ const Profile = () => {
         const data = studentSnap.data();
         setStudentData(data);
 
-        const trades = await Promise.all(
-          (data.interests || []).map(async (ref) => {
-            const docSnap = await getDoc(ref);
-            return docSnap.exists() ? docSnap.data().name : "(Unknown)";
-          })
-        );
-        setInterests(trades);
+        const tradeNames = await fetchTradeNames(data.interests || []);
+        setInterests(tradeNames);
 
-        const skillNames = await Promise.all(
-          (data.skills || []).map(async (ref) => {
-            const docSnap = await getDoc(ref);
-            return docSnap.exists() ? docSnap.data().name : "(Unknown)";
-          })
-        );
+        const skillNames = await fetchSkillNames(data.skills || []);
         setSkills(skillNames);
 
-        const expSnap = await getDocs(
-          collection(db, "students", user.uid, "experience")
-        );
-        const expList = expSnap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const expList = await fetchExperience();
         setExperience(expList);
 
         setLoading(false);
@@ -170,10 +190,21 @@ const Profile = () => {
   };
 
   const saveInterests = async () => {
-    const studentRef = doc(db, "students", user.uid);
-    await setDoc(studentRef, { interests: selectedTradeRefs }, { merge: true });
-    setEditInterestsOpen(false);
-    window.location.reload();
+    try {
+      const studentRef = doc(db, "students", user.uid);
+      await setDoc(
+        studentRef,
+        { interests: selectedTradeRefs },
+        { merge: true }
+      );
+      setStudentData((prev) => ({ ...prev, interests: selectedTradeRefs }));
+      const tradeNames = await fetchTradeNames(selectedTradeRefs);
+      setInterests(tradeNames);
+
+      setEditInterestsOpen(false);
+    } catch (error) {
+      console.error("Error saving interests:", error);
+    }
   };
 
   const openEditSkills = () => {
@@ -182,17 +213,62 @@ const Profile = () => {
   };
 
   const saveSkills = async () => {
-    const studentRef = doc(db, "students", user.uid);
-    await setDoc(studentRef, { skills: selectedSkillRefs }, { merge: true });
-    setEditSkillsOpen(false);
-    window.location.reload();
+    try {
+      const studentRef = doc(db, "students", user.uid);
+      await setDoc(studentRef, { skills: selectedSkillRefs }, { merge: true });
+      setStudentData((prev) => ({ ...prev, skills: selectedSkillRefs }));
+      const skillNames = await fetchSkillNames(selectedSkillRefs);
+      setSkills(skillNames);
+
+      setEditSkillsOpen(false);
+    } catch (error) {
+      console.error("Error saving skills:", error);
+    }
   };
 
   const saveYear = async () => {
-    const studentRef = doc(db, "students", user.uid);
-    await setDoc(studentRef, { year: selectedYear }, { merge: true });
-    setEditYearOpen(false);
-    window.location.reload();
+    try {
+      const studentRef = doc(db, "students", user.uid);
+      await setDoc(studentRef, { year: selectedYear }, { merge: true });
+      setStudentData((prev) => ({ ...prev, year: selectedYear }));
+      setEditYearOpen(false);
+    } catch (error) {
+      console.error("Error saving year:", error);
+    }
+  };
+
+  const saveExperience = async () => {
+    try {
+      const { id, ...data } = experienceToEdit;
+      const expRef = id
+        ? doc(db, "students", user.uid, "experience", id)
+        : doc(collection(db, "students", user.uid, "experience"));
+
+      await setDoc(expRef, data, { merge: true });
+
+      const updatedExperience = await fetchExperience();
+      setExperience(updatedExperience);
+
+      setEditExpOpen(false);
+    } catch (error) {
+      console.error("Error saving experience:", error);
+    }
+  };
+
+  const deleteExperience = async () => {
+    try {
+      await deleteDoc(
+        doc(db, "students", user.uid, "experience", experienceToEdit.id)
+      );
+
+      setExperience((prev) =>
+        prev.filter((exp) => exp.id !== experienceToEdit.id)
+      );
+
+      setEditExpOpen(false);
+    } catch (error) {
+      console.error("Error deleting experience:", error);
+    }
   };
 
   if (loading) {
@@ -517,38 +593,12 @@ const Profile = () => {
         </DialogContent>
         <DialogActions>
           {experienceToEdit?.id && (
-            <Button
-              color="error"
-              onClick={async () => {
-                await deleteDoc(
-                  doc(
-                    db,
-                    "students",
-                    user.uid,
-                    "experience",
-                    experienceToEdit.id
-                  )
-                );
-                setEditExpOpen(false);
-                window.location.reload();
-              }}
-            >
+            <Button color="error" onClick={deleteExperience}>
               Delete
             </Button>
           )}
           <Button onClick={() => setEditExpOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={async () => {
-              const { id, ...data } = experienceToEdit;
-              const expRef = id
-                ? doc(db, "students", user.uid, "experience", id)
-                : doc(collection(db, "students", user.uid, "experience"));
-              await setDoc(expRef, data, { merge: true });
-              setEditExpOpen(false);
-              window.location.reload();
-            }}
-          >
+          <Button variant="contained" onClick={saveExperience}>
             Save
           </Button>
         </DialogActions>
