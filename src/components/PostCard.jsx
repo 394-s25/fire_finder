@@ -17,7 +17,7 @@ import { useAuthContext } from "../services/userProvider";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../services/firestoreConfig";
 
-const PostCard = ({ post }) => {
+const PostCard = ({ post, onSaveToggle }) => {
   const { user } = useAuthContext();
 
   const [liked, setLiked] = useState(false);
@@ -25,41 +25,125 @@ const PostCard = ({ post }) => {
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
-    const fetchSaved = async () => {
-      if (!user || !post?.id) return;
-      const studentSnap = await getDoc(doc(db, "students", user.uid));
-      const savedRefs = studentSnap.data()?.posts || [];
-      const isBookmarked = savedRefs.some(
-        (ref) => ref.path === `posts/${post.id}`
-      );
-      setIsSaved(isBookmarked);
-    };
-    fetchSaved();
-  }, [user, post?.id]);
+    if (post) {
+      setLiked(post.likedBy?.includes(user?.uid) || false);
+      setLikeCount(post.likes || 0);
+
+      const checkIfSaved = async () => {
+        if (!user || !post?.id) return;
+        try {
+          const studentSnap = await getDoc(doc(db, "students", user.uid));
+          const savedRefs = studentSnap.data()?.posts || [];
+          const isBookmarked = savedRefs.some(
+            (ref) => ref.path === `posts/${post.id}`
+          );
+          setIsSaved(isBookmarked);
+        } catch (error) {
+          console.error("Error checking saved status:", error);
+        }
+      };
+
+      checkIfSaved();
+    }
+  }, [user, post]);
 
   const toggleLike = async () => {
-    const newLiked = !liked;
-    setLiked(newLiked);
-    setLikeCount((prev) => (newLiked ? prev + 1 : prev - 1));
-    await updateDoc(doc(db, "posts", post.id), {
-      likes: newLiked ? likeCount + 1 : likeCount - 1,
-    });
+    if (!user || !post?.id) return;
+
+    try {
+      const newLiked = !liked;
+      const postRef = doc(db, "posts", post.id);
+
+      setLiked(newLiked);
+      setLikeCount((prev) => (newLiked ? prev + 1 : prev - 1));
+
+      if (newLiked) {
+        await updateDoc(postRef, {
+          likes: likeCount + 1,
+          likedBy: arrayUnion(user.uid),
+        });
+      } else {
+        await updateDoc(postRef, {
+          likes: Math.max(0, likeCount - 1),
+          likedBy: arrayRemove(user.uid),
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error);
+
+      setLiked((prev) => !prev);
+      setLikeCount((prev) => (liked ? prev + 1 : prev - 1));
+    }
   };
 
   const toggleSave = async () => {
-    if (!user) return;
+    if (!user || !post?.id) return;
 
-    const studentRef = doc(db, "students", user.uid);
-    const postRef = doc(db, "posts", post.id);
-    const studentSnap = await getDoc(studentRef);
-    const current = studentSnap.data()?.posts || [];
+    try {
+      const studentRef = doc(db, "students", user.uid);
+      const postRef = doc(db, "posts", post.id);
 
-    const updated = isSaved
-      ? current.filter((ref) => ref.path !== postRef.path)
-      : [...current, postRef];
+      const newSavedState = !isSaved;
+      setIsSaved(newSavedState);
 
-    await updateDoc(studentRef, { posts: updated });
-    setIsSaved(!isSaved);
+      const studentSnap = await getDoc(studentRef);
+      const currentSaved = studentSnap.data()?.posts || [];
+      const updatedSaved = newSavedState
+        ? [...currentSaved, postRef]
+        : currentSaved.filter((ref) => ref.path !== postRef.path);
+
+      await updateDoc(studentRef, { posts: updatedSaved });
+
+      if (onSaveToggle) {
+        onSaveToggle();
+      }
+    } catch (error) {
+      console.error("Error toggling save:", error);
+      setIsSaved((prev) => !prev);
+    }
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator
+        .share({
+          title: `Post by ${post.authorName || "Anonymous"}`,
+          text: post.text,
+          url: window.location.href,
+        })
+        .catch(console.error);
+    } else {
+      navigator.clipboard
+        .writeText(window.location.href)
+        .then(() => {
+          console.log("Link copied to clipboard");
+        })
+        .catch(console.error);
+    }
+  };
+
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return "";
+
+    let date;
+    if (timestamp.seconds) {
+      date = new Date(timestamp.seconds * 1000);
+    } else if (timestamp.toDate) {
+      date = timestamp.toDate();
+    } else {
+      date = new Date(timestamp);
+    }
+
+    const now = new Date();
+    const diffInHours = (now - date) / (1000 * 60 * 60);
+
+    if (diffInHours < 1) {
+      return `${Math.floor(diffInHours * 60)}m ago`;
+    } else if (diffInHours < 24) {
+      return `${Math.floor(diffInHours)}h ago`;
+    } else {
+      return `${Math.floor(diffInHours / 24)}d ago`;
+    }
   };
 
   return (
@@ -84,10 +168,13 @@ const PostCard = ({ post }) => {
             }}
           >
             <Typography variant="h6" sx={{ fontSize: "1.1rem" }}>
-              {post.author || "Anon"}
+              {post.authorName || post.author || "Anonymous"}
             </Typography>
-            <Typography variant="caption" sx={{ fontSize: "0.8rem" }}>
-              {post.followers || 0} followers
+            <Typography
+              variant="caption"
+              sx={{ fontSize: "0.8rem", color: "gray" }}
+            >
+              {formatTimestamp(post.timestamp)}
             </Typography>
           </Box>
         }
@@ -160,14 +247,14 @@ const PostCard = ({ post }) => {
             {likeCount}
           </Typography>
         </Box>
-        <IconButton>
+        <IconButton onClick={toggleSave}>
           {isSaved ? (
             <BookmarkIcon sx={{ color: "#783c3c" }} />
           ) : (
             <BookmarkBorderIcon sx={{ color: "#783c3c" }} />
           )}
         </IconButton>
-        <IconButton>
+        <IconButton onClick={handleShare}>
           <ShareIcon sx={{ color: "rgb(120, 60, 60)" }} />
         </IconButton>
       </Box>
