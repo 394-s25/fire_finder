@@ -8,7 +8,7 @@ import PostModal from "./PostModal";
 import EventModal from "./EventModal";
 import PollModal from "./PollModal";
 
-const NewPostModal = () => {
+const NewPostModal = ({ onPostCreated }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
@@ -169,7 +169,11 @@ const NewPostModal = () => {
           </Box>
         </Box>
       )}
-      <PostModal open={isPostModalOpen} onClose={closePostModal} />
+      <PostModal
+        open={isPostModalOpen}
+        onClose={closePostModal}
+        onPostCreated={onPostCreated}
+      />
       <EventModal open={isEventModalOpen} onClose={closeEventModal} />
       <PollModal open={isPollModalOpen} onClose={closePollModal} />
     </Box>
