@@ -1,6 +1,7 @@
 import { Modal, Box, IconButton, Typography, Button, Checkbox, FormControlLabel } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CloseIcon from "@mui/icons-material/Close";
+import TodayIcon from '@mui/icons-material/Today';
 import banner from "../imgs/banner.png"; // Placeholder for the banner image
 
 const EventDetails = ({
@@ -49,10 +50,10 @@ const EventDetails = ({
                 </IconButton>
                 <div className="flex flex-col">
                 {/* Banner Image */}
-                    <Box sx={{ width: "100%", height: "400px", overflow: "scroll", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "gray" }}>
+                    <Box sx={{ width: "100%", height: "400px", overflow: "scroll", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "black" }}>
                         <img
                         src={image}
-                        alt={'banner img'}
+                        alt={banner}
                         />
                     </Box>
                     {/* Content Section */}
@@ -75,21 +76,24 @@ const EventDetails = ({
                                 {location}
                                 </Typography>
                             </Box>
-                            <Typography variant="body1" className="text-gray-600 mb-4">
-                                {startDate?.toLocaleDateString([], {
-                                weekday: "long",
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                })}{" "}
-                                -{" "}
-                                {endDate?.toLocaleDateString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                })}
-                            </Typography>
+                            <Box sx={{ display: "flex", alignItems: "center", mb: 2, flexDirection: "row" }}>
+                                <TodayIcon sx={{ color: "#f97316", mr: 1 }} />
+                                <Typography variant="body1" className="text-gray-600 mb-4">
+                                    {startDate?.toLocaleDateString([], {
+                                    weekday: "long",
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    })}{" "}
+                                    -{" "}
+                                    {endDate?.toLocaleDateString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    })}
+                                </Typography>
+                            </Box>
                             <Typography
                                 id="event-modal-description"
                                 variant="body1"

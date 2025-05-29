@@ -6,7 +6,6 @@ import SortDropdown from "../components/Eventsdropdown";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../services/firestoreConfig";
 import { Tabs, Tab } from "@mui/material";
-import MediaCard from "../components/EventDetails";
 
 const Events = () => {
   const eventsData = {

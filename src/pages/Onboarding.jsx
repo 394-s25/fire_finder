@@ -103,7 +103,7 @@ export default function OnboardingForm() {
         year,
         skills: skillRefs,
       });
-
+      
       for (const exp of experienceList) {
         await addDoc(collection(db, "students", user.uid, "experience"), exp);
       }

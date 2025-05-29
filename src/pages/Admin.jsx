@@ -25,7 +25,7 @@ export default function Admin() {
 
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  
   const fetchRequests = async () => {
     const snapshot = await getDocs(collection(db, "admin_requests"));
     const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));

@@ -5,6 +5,7 @@ import PhotoIcon from '@mui/icons-material/Photo';
 const EventModal = ({ open, onClose }) => {
     const [eventTitle, setEventTitle] = useState('');
     const [eventDate, setEventDate] = useState('');
+    const [eventEndDate, setEventEndDate] = useState('');
     const [eventLocation, setEventLocation] = useState('');
     const [eventDescription, setEventDescription] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
@@ -36,8 +37,10 @@ const EventModal = ({ open, onClose }) => {
         const currentDate = new Date(`${year}-${month}-${day}`).getTime(); // Midnight today
 
         const selectedDate = new Date(eventDate).getTime();
+        const selectedEndDate = new Date(eventEndDate).getTime();
+        
 
-        if (!eventTitle || !eventDate || (!eventDescription && !selectedFile)) {
+        if (!eventTitle || !eventDate || !eventEndDate || (!eventDescription && !selectedFile)) {
             // Existing validation for required fields
             return;
         }
@@ -47,22 +50,29 @@ const EventModal = ({ open, onClose }) => {
             return;
         }
 
+        if (selectedDate > selectedEndDate) {
+            alert('End time must be after start date');
+            return;
+        }
+
         console.log('Event published:', {
             title: eventTitle,
             date: eventDate,
+            end: eventEndDate,
             location: eventLocation,
             description: eventDescription,
             file: selectedFile ? { name: selectedFile.name, type: selectedFile.type } : null,
         });
         setEventTitle('');
         setEventDate(null);
+        setEventEndDate
         setEventLocation('');
         setEventDescription('');
         setSelectedFile(null);
         setImagePreview(null);
         onClose();
         };
-
+        
     return (
         <Modal open={open} onClose={onClose}>
         <Box
@@ -145,10 +155,20 @@ const EventModal = ({ open, onClose }) => {
             />
             <TextField
             fullWidth
-            label="Event Date"
-            type="date"
+            label="Event Start Date-Time"
+            type="datetime-local"
             value={eventDate}
             onChange={(e) => setEventDate(e.target.value)}
+            variant="outlined"
+            InputLabelProps={{ shrink: true }}
+            sx={{ mb: 2 }}
+            />
+            <TextField
+            fullWidth
+            label="Event End Date-Time"
+            type="datetime-local"
+            value={eventEndDate}
+            onChange={(e) => setEventEndDate(e.target.value)}
             variant="outlined"
             InputLabelProps={{ shrink: true }}
             sx={{ mb: 2 }}
@@ -177,7 +197,7 @@ const EventModal = ({ open, onClose }) => {
             <Button
                 variant="contained"
                 onClick={handlePublish}
-                disabled={!eventTitle || !eventDate || (!eventDescription && !selectedFile)}
+                disabled={!eventTitle || !eventDate || !eventEndDate || (!eventDescription && !selectedFile)}
                 sx={{ backgroundColor: 'rgb(175, 4, 4)', '&:hover': { backgroundColor: 'rgba(171, 67, 67, 0.8)' } }}
             >
                 Publish
