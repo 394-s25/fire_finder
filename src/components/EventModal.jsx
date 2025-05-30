@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Box, TextField, IconButton, Button, Typography } from '@mui/material';
 import PhotoIcon from '@mui/icons-material/Photo';
+import { createEvent } from '../services/Events';
 
 const EventModal = ({ open, onClose }) => {
     const [eventTitle, setEventTitle] = useState('');
@@ -10,6 +11,7 @@ const EventModal = ({ open, onClose }) => {
     const [eventDescription, setEventDescription] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
+    const [error, setError] = useState('');
 
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
@@ -20,6 +22,7 @@ const EventModal = ({ open, onClose }) => {
         } else {
             setSelectedFile(null); // Reject non-image files
             setImagePreview(null);
+            setError('Please select an image file');
         }
         }
     };
@@ -29,7 +32,8 @@ const EventModal = ({ open, onClose }) => {
         setImagePreview(null);
     };
 
-    const handlePublish = () => {
+    const handlePublish = async () => {
+        setError(''); 
         const today = new Date();
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0'); // Add 1 and pad
@@ -40,37 +44,44 @@ const EventModal = ({ open, onClose }) => {
         const selectedEndDate = new Date(eventEndDate).getTime();
         
 
-        if (!eventTitle || !eventDate || !eventEndDate || (!eventDescription && !selectedFile)) {
-            // Existing validation for required fields
+        if (!eventTitle || !eventDate || !eventEndDate || !eventDescription) {
+            setError('Please fill in all required fields');
             return;
         }
 
-        if (selectedDate <= currentDate) {
+        if (selectedDate < currentDate) {
             alert('Ensure date is correct');
             return;
         }
 
         if (selectedDate > selectedEndDate) {
-            alert('End time must be after start date');
+            setError('End date must be after start date');
             return;
         }
 
-        console.log('Event published:', {
-            title: eventTitle,
-            date: eventDate,
-            end: eventEndDate,
-            location: eventLocation,
-            description: eventDescription,
-            file: selectedFile ? { name: selectedFile.name, type: selectedFile.type } : null,
-        });
-        setEventTitle('');
-        setEventDate(null);
-        setEventEndDate
-        setEventLocation('');
-        setEventDescription('');
-        setSelectedFile(null);
-        setImagePreview(null);
-        onClose();
+        try {
+            const eventData = {
+                title: eventTitle,
+                startDate: eventDate,
+                endDate: eventEndDate,
+                location: eventLocation,
+                description: eventDescription,
+            };
+
+            await createEvent(eventData, selectedFile);
+
+            // Reset form on success
+            setEventTitle('');
+            setEventDate('');
+            setEventEndDate('');
+            setEventLocation('');
+            setEventDescription('');
+            setSelectedFile(null);
+            setImagePreview(null);
+            onClose();
+        } catch (error) {
+            setError(error.message || 'Failed to create event');
+        }
         };
         
     return (
@@ -93,6 +104,11 @@ const EventModal = ({ open, onClose }) => {
             <Typography variant="h6" sx={{ mb: 2, fontFamily: '"Times New Roman", Georgia, serif', color: 'rgb(175, 4, 4)' }}>
             Create Event
             </Typography>
+            {error && (
+            <Typography color="error" sx={{ mb: 2 }}>
+                {error}
+            </Typography>
+            )}
             <Box
             sx={{
                 border: '1px solid rgba(0, 0, 0, 0.23)', // Matches TextField outlined border
@@ -197,7 +213,7 @@ const EventModal = ({ open, onClose }) => {
             <Button
                 variant="contained"
                 onClick={handlePublish}
-                disabled={!eventTitle || !eventDate || !eventEndDate || (!eventDescription && !selectedFile)}
+                disabled={!eventTitle || !eventDate || !eventEndDate || !eventDescription}
                 sx={{ backgroundColor: 'rgb(175, 4, 4)', '&:hover': { backgroundColor: 'rgba(171, 67, 67, 0.8)' } }}
             >
                 Publish

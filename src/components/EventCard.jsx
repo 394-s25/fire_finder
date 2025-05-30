@@ -9,6 +9,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { Button } from "@mui/material";
 import { db } from "../services/firestoreConfig";
 import EventDetails from "./EventDetails";
+import banner from "../imgs/logo.png"; // Default banner image
 
 const EventCard = ({
   id,
@@ -27,67 +28,103 @@ const EventCard = ({
   const studentRef = doc(db, "students", user.uid);
   const eventRef = doc(db, "events", id);
 
+  // Fetch student and event data to set RSVP and saved states
   useEffect(() => {
     const fetchState = async () => {
-      if (!user) return;
+      if (!user) {
+        setIsRSVPd(false);
+        setIsSaved(false);
+        return;
+      }
 
       const studentSnap = await getDoc(studentRef);
-      const eventSnap = await getDoc(eventRef);
+      const studentData = studentSnap.data() || {};
 
-      const studentEvents = studentSnap.data()?.events || [];
-      const rsvpStudents = eventSnap.data()?.rsvp || [];
+      const studentRsvp = studentData.rsvp || [];
+      const studentSaved = studentData.saved || [];
 
-      const isEventSaved = studentEvents.some(
-        (ref) => ref.path === eventRef.path
-      );
-      const isStudentRSVPd = rsvpStudents.some(
-        (ref) => ref.path === studentRef.path
-      );
-
-      setIsSaved(isEventSaved);
-      setIsRSVPd(isStudentRSVPd);
+      setIsRSVPd(studentRsvp.some((ref) => ref.path === eventRef.path));
+      setIsSaved(studentSaved.some((ref) => ref.path === eventRef.path));
     };
     fetchState();
   }, [user, studentRef, eventRef]);
 
-  const toggleSave = async () => {
-    if (!user) return;
-
-    const studentSnap = await getDoc(studentRef);
-    const current = studentSnap.data()?.events || [];
-
-    const alreadySaved = current.some((ref) => ref.path === eventRef.path);
-    const updated = alreadySaved
-      ? current.filter((ref) => ref.path !== eventRef.path)
-      : [...current, eventRef];
-    await updateDoc(studentRef, { events: updated });
-    setIsSaved(!alreadySaved);
-  };
-
-  const toggleRSVP = async () => {
+  // Toggle save checkbox
+  const toggleSave = async (e) => {
+    e.stopPropagation(); // Prevent click from opening modal
     if (!user) return;
 
     const studentSnap = await getDoc(studentRef);
     const eventSnap = await getDoc(eventRef);
 
-    const studentEvents = studentSnap.data()?.events || [];
-    const rsvpList = eventSnap.data()?.rsvp || [];
+    const studentData = studentSnap.data() || {};
+    const eventData = eventSnap.data() || {};
 
-    const alreadyRSVPd = rsvpList.some((ref) => ref.path === studentRef.path);
+    const studentSaved = studentData.saved || [];
+    const eventSavedStudents = eventData.saved || [];
 
-    const updatedStudentEvents = alreadyRSVPd
-      ? studentEvents.filter((ref) => ref.path !== eventRef.path)
-      : [...studentEvents, eventRef];
+    const isCurrentlySaved = studentSaved.some(
+      (ref) => ref.path === eventRef.path
+    );
 
-    const updatedEventRsvp = alreadyRSVPd
-      ? rsvpList.filter((ref) => ref.path !== studentRef.path)
-      : [...rsvpList, studentRef];
+    if (isCurrentlySaved) {
+      // Remove from student's saved and event's saved
+      await updateDoc(studentRef, {
+        saved: studentSaved.filter((ref) => ref.path !== eventRef.path),
+      });
+      await updateDoc(eventRef, {
+        saved: eventSavedStudents.filter((ref) => ref.path !== studentRef.path),
+      });
+      setIsSaved(false);
+    } else {
+      // Add to student's saved and event's saved
+      await updateDoc(studentRef, {
+        saved: [...studentSaved, eventRef],
+      });
+      await updateDoc(eventRef, {
+        saved: [...eventSavedStudents, studentRef],
+      });
+      setIsSaved(true);
+    }
+  };
 
-    await updateDoc(studentRef, { events: updatedStudentEvents });
-    await updateDoc(eventRef, { rsvp: updatedEventRsvp });
+  // Toggle RSVP checkbox
+  const toggleRSVP = async (e) => {
+    e.stopPropagation(); // Prevent click from opening modal
+    if (!user) return;
 
-    setIsRSVPd(!alreadyRSVPd);
-    setIsSaved(!alreadyRSVPd);
+    const studentSnap = await getDoc(studentRef);
+    const eventSnap = await getDoc(eventRef);
+
+    const studentData = studentSnap.data() || {};
+    const eventData = eventSnap.data() || {};
+
+    const studentRsvp = studentData.rsvp || [];
+    const eventRsvpStudents = eventData.rsvp || [];
+
+    const isCurrentlyRSVPd = studentRsvp.some(
+      (ref) => ref.path === eventRef.path
+    );
+
+    if (isCurrentlyRSVPd) {
+      // Remove from student's rsvp and event's rsvp
+      await updateDoc(studentRef, {
+        rsvp: studentRsvp.filter((ref) => ref.path !== eventRef.path),
+      });
+      await updateDoc(eventRef, {
+        rsvp: eventRsvpStudents.filter((ref) => ref.path !== studentRef.path),
+      });
+      setIsRSVPd(false);
+    } else {
+      // Add to student's rsvp and event's rsvp
+      await updateDoc(studentRef, {
+        rsvp: [...studentRsvp, eventRef],
+      });
+      await updateDoc(eventRef, {
+        rsvp: [...eventRsvpStudents, studentRef],
+      });
+      setIsRSVPd(true);
+    }
   };
 
   const openEvent = () => {
@@ -97,6 +134,10 @@ const EventCard = ({
   const closeEvent = () => {
     setIsEventOpen(false);
   };
+
+  if (!image) {
+    image = banner;
+  }
 
   return (
     <>
@@ -190,7 +231,8 @@ const EventCard = ({
                 control={
                   <Checkbox
                     checked={isRSVPd}
-                    onChange={toggleRSVP}
+                    onChange={(e) => toggleRSVP(e)}
+                    onClick={(e) => e.stopPropagation()} // Stop click propagation
                     sx={{
                       color: "#f97316",
                       "&.Mui-checked": { color: "#f97316" },
@@ -214,7 +256,8 @@ const EventCard = ({
                 control={
                   <Checkbox
                     checked={isSaved}
-                    onChange={toggleSave}
+                    onChange={(e) => toggleSave(e)}
+                    onClick={(e) => e.stopPropagation()} // Stop click propagation
                     sx={{
                       color: "#f97316",
                       "&.Mui-checked": { color: "#f97316" },

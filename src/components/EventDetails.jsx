@@ -2,7 +2,6 @@ import { Modal, Box, IconButton, Typography, Button, Checkbox, FormControlLabel 
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CloseIcon from "@mui/icons-material/Close";
 import TodayIcon from '@mui/icons-material/Today';
-import banner from "../imgs/banner.png"; // Placeholder for the banner image
 
 const EventDetails = ({
     open,
@@ -53,7 +52,7 @@ const EventDetails = ({
                     <Box sx={{ width: "100%", height: "400px", overflow: "scroll", alignItems: "center", justifyContent: "center", display: "flex", backgroundColor: "black" }}>
                         <img
                         src={image}
-                        alt={banner}
+                        alt={`${title} banner`}
                         />
                     </Box>
                     {/* Content Section */}
@@ -134,24 +133,32 @@ const EventDetails = ({
                                 mb: 2,
                                 }}
                             />
-                            <Button
-                                variant="contained"
-                                onClick={toggleRSVP}
+                            <FormControlLabel
+                                control={
+                                <Checkbox
+                                    checked={isRSVPd}
+                                    onChange={toggleRSVP}
+                                    sx={{
+                                    display: "flex",
+                                    color: "#f97316",
+                                    "&.Mui-checked": { color: "#f97316" },
+                                    }}
+                                />
+                                }
+                                label="RSVP"
                                 sx={{
-                                bgcolor: "#f97316",
-                                "&:hover": { bgcolor: "#e55e0d" },
-                                mb: 2,
-                                width: "100px",
-                                color: "white",
-                                fontWeight: "bold",
+                                border: "1px solid #f97316",
                                 borderRadius: "0.25rem",
+                                width: "100px",
                                 display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
+                                ml: 2,
+                                color: "#f97316",
+                                "&:hover": {
+                                    backgroundColor: "rgba(249, 115, 22, 0.05)",
+                                },
+                                mb: 2,
                                 }}
-                            >
-                                {isRSVPd ? "Cancel RSVP" : "RSVP"}
-                            </Button>
+                            />
                             {isRSVPd && (
                                 <a
                                 href={getGoogleCalendarUrl({
