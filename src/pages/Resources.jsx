@@ -8,6 +8,13 @@ import ResourcesTab from "../components/ResourcesTab";
 import { doc, collection, getDoc, getDocs } from "firebase/firestore";
 import { db } from "../services/firestoreConfig";
 import { useAuthContext } from "../services/userProvider";
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Typography
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 function TabPanel({ children, value, index }) {
   return (
@@ -98,7 +105,7 @@ const Resources = () => {
   return (
     <>
       <Navbar />
-      <Box sx={{ pt: "112px", px: 2 }}>
+      <Box sx={{ pt: "110px", }}>
         <Box
           sx={{
             position: "absolute",
@@ -133,9 +140,10 @@ const Resources = () => {
             <Tab label="Training" />
             <Tab label="Trades" />
             <Tab label="Contacts" />
+            <Tab label="My Resources" />
           </Tabs>
         </Box>
-
+        
         <Box sx={{ px: 2, pb: 5 }}>
           <TabPanel value={tab} index={0}>
             <ResourcesTab
@@ -168,6 +176,36 @@ const Resources = () => {
               data={contacts}
               CardComponent={ContactCard}
             />
+          </TabPanel>
+          <TabPanel value={tab} index={3}>
+            <Box sx={{flexDirection: "column", display: "flex", justifyContent:"flex-start", mt: -3}}>
+                <h1 style = {{fontWeight:"lighter"}}>My Resources</h1>
+                <Box>
+                  <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />} sx = {{backgroundColor:"rgba(0, 0, 0, 0.1)"}}>
+                  <Typography sx = {{fontSize:23, fontWeight:"500"}}>Trades</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                    </AccordionDetails>
+                  </Accordion>
+                  
+                  <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />} sx = {{backgroundColor:"rgba(0, 0, 0, 0.1)"}}>
+                  <Typography sx = {{fontSize:23, fontWeight:"500"}}>Trainings</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                    </AccordionDetails>
+                  </Accordion>
+                  
+                  <Accordion>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />} sx = {{backgroundColor:"rgba(0, 0, 0, 0.1)"}}>
+                      <Typography sx = {{fontSize:23, fontWeight:"500"}}>Contacts</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                    </AccordionDetails>
+                  </Accordion>
+                </Box>
+            </Box>
           </TabPanel>
         </Box>
       </Box>
