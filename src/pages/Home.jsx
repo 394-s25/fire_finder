@@ -4,7 +4,14 @@ import ProfileCard from "../components/ProfileCard";
 import NewPostModal from "../components/NewPost";
 import PostCard from "../components/PostCard";
 import { useAuthContext } from "../services/userProvider";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+} from "firebase/firestore";
 import { db } from "../services/firestoreConfig";
 import {
   Box,
@@ -57,46 +64,59 @@ const Home = () => {
   const [sortOption, setSortOption] = useState("Recent");
   const [search, setSearch] = useState("");
   const { user } = useAuthContext();
-  
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const querySnapshot = await getDocs(collection(db, "posts"));
+
+  const fetchPosts = async () => {
+    try {
+      const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+      const querySnapshot = await getDocs(q);
       const allPosts = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
       setPosts(allPosts);
-    };
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    }
+  };
 
-    const fetchSaved = async () => {
-      if (!user) return;
-      try {
-        const studentSnap = await getDoc(doc(db, "students", user.uid));
-        const savedRefs = studentSnap.data()?.posts || [];
-        const saved = await Promise.all(
-          savedRefs.map(async (ref) => {
-            const snap = await getDoc(ref);
-            return snap.exists() ? { id: snap.id, ...snap.data() } : null;
-          })
-        );
-        setSavedPosts(saved.filter(Boolean));
-      } catch (error) {
-        console.error("Error fetching saved posts: ", error);
-      }
-    };
+  const fetchSaved = async () => {
+    if (!user) return;
+    try {
+      const studentSnap = await getDoc(doc(db, "students", user.uid));
+      const savedRefs = studentSnap.data()?.posts || [];
+      const saved = await Promise.all(
+        savedRefs.map(async (ref) => {
+          const snap = await getDoc(ref);
+          return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+        })
+      );
+      setSavedPosts(saved.filter(Boolean));
+    } catch (error) {
+      console.error("Error fetching saved posts: ", error);
+    }
+  };
 
+  useEffect(() => {
     fetchPosts();
     fetchSaved();
   }, [user]);
+
+  const handlePostCreated = () => {
+    fetchPosts();
+  };
 
   const filteredPosts = (tab === 0 ? posts : savedPosts)
     .filter((post) => post.text?.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
       if (sortOption === "Recent") {
-        return b.timestamp?.seconds - a.timestamp?.seconds;
-      } else if (sortOption === "Popular") {
-        return (b.likes || 0) - (a.likes || 0);
-      } else if (sortOption === "Most Liked") {
+        const aTime =
+          a.timestamp?.seconds ||
+          (a.timestamp?.toDate?.() ? a.timestamp.toDate().getTime() / 1000 : 0);
+        const bTime =
+          b.timestamp?.seconds ||
+          (b.timestamp?.toDate?.() ? b.timestamp.toDate().getTime() / 1000 : 0);
+        return bTime - aTime;
+      } else if (sortOption === "Popular" || sortOption === "Most Liked") {
         return (b.likes || 0) - (a.likes || 0);
       }
       return 0;
@@ -113,7 +133,7 @@ const Home = () => {
           mr={5}
         >
           <ProfileCard />
-          <NewPostModal />
+          <NewPostModal onPostCreated={handlePostCreated} />
         </Box>
         
         <Box flex={2} maxWidth="700px">
@@ -161,9 +181,25 @@ const Home = () => {
             </Box>
           </Paper>
           <Box>
-            {filteredPosts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
+            {filteredPosts.length === 0 ? (
+              <Typography
+                variant="body1"
+                sx={{
+                  textAlign: "center",
+                  color: "gray",
+                  mt: 4,
+                  fontStyle: "italic",
+                }}
+              >
+                {tab === 0
+                  ? "No posts yet. Create the first one!"
+                  : "No saved posts yet."}
+              </Typography>
+            ) : (
+              filteredPosts.map((post) => (
+                <PostCard key={post.id} post={post} onSaveToggle={fetchSaved} />
+              ))
+            )}
           </Box>
         </Box>
       </Box>
