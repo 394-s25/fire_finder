@@ -31,6 +31,6 @@ describe("Fire Finder Tests", () => {
         <App />
       </UserProvider>
     );
-    expect(screen.getByText("Explofoore")).toBeInTheDocument();
+    expect(screen.getByText("Explore")).toBeInTheDocument();
   });
 });
