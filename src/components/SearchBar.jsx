@@ -22,8 +22,6 @@ const SearchBar = ({ value, onChange }) => {
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder="Search"
-<<<<<<< HEAD
-=======
       sx={{
         bgcolor: "transparent",
         position: "fixed",
@@ -33,7 +31,6 @@ const SearchBar = ({ value, onChange }) => {
         bottompadding: "15px",
         zIndex: -1,
       }}
->>>>>>> 65a11e4afcad14f8cf5f82851155c39267abfb39
     />
   );
 };
