@@ -40,6 +40,7 @@ const SortDropdown = () => {
         width: "auto", // Let parent flex handle width
         position: "fixed",
         top: "130px", // Adjusted to match the tabs
+        zIndex: -1, // Adjusted to match the tabs
       }}
     >
       {/* Horizontal line */}
@@ -47,8 +48,8 @@ const SortDropdown = () => {
         sx={{
           position: "fixed",
           top: "145px", // Align with the tabs
-          left: "190px", // Adjusted to start from sidebar edge (300px - 50px buffer)
-          right: "340px",
+          left: "35px", // Adjusted to start from sidebar edge (300px - 50px buffer)
+          right: "180px",
           height: "1px",
           bgcolor: "gray", // Match the "Sort" label color
           zIndex: -1, // Ensure line is behind text
@@ -59,12 +60,12 @@ const SortDropdown = () => {
       <Box
         sx={{
           position: "fixed",
-          top: "130px",
+          top: "137px",
           alignItems: "center",
           justifyContent: "flex-end",
           pr: 1,
-          left: "870px",
-          zIndex: 1, // Adjusted to align with the dropdown
+          left: "700px",
+          zIndex: -1, // Adjusted to align with the dropdown
           bottompadding: "10px",
         }}
       >

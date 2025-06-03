@@ -50,7 +50,7 @@ const Events = () => {
             style={{
               color: "black",
               position: "absolute",
-              left: "190px",
+              //left: "190px",
               top: "90px",
               marginBotton: "100px",
             }}
