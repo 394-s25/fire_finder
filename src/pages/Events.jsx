@@ -119,7 +119,7 @@ const Events = () => {
                 alignSelf: "flex-start",
                 position: "absolute",
                 top: "95px", // Align with the tabs
-                left: "35px",
+                left: "80px",
               }}
             >
               + Create New Event

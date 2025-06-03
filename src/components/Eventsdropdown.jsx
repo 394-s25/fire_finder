@@ -48,8 +48,8 @@ const SortDropdown = () => {
         sx={{
           position: "fixed",
           top: "145px", // Align with the tabs
-          left: "35px", // Adjusted to start from sidebar edge (300px - 50px buffer)
-          right: "180px",
+          left: "80px", // Adjusted to start from sidebar edge (300px - 50px buffer)
+          right: "245px",
           height: "1px",
           bgcolor: "gray", // Match the "Sort" label color
           zIndex: -1, // Ensure line is behind text
@@ -64,7 +64,7 @@ const SortDropdown = () => {
           alignItems: "center",
           justifyContent: "flex-end",
           pr: 1,
-          left: "700px",
+          left: "755px",
           zIndex: -1, // Adjusted to align with the dropdown
           bottompadding: "10px",
         }}
