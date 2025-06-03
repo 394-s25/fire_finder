@@ -9,7 +9,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { Button } from "@mui/material";
 import { db } from "../services/firestoreConfig";
 
-const EventCard = ({
+const EventCardStudent = ({
   id,
   title,
   description,
@@ -257,4 +257,4 @@ const EventCard = ({
   );
 };
 
-export default EventCard;
+export default EventCardStudent;
