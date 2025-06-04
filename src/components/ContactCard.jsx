@@ -6,8 +6,11 @@ import {
   CardContent,
   Typography,
 } from "@mui/material";
+import { useAuthContext } from "../services/userProvider";
 
-export default function ContactCard({ data }) {
+export default function ContactCard({ data, onDelete }) {
+  const { user } = useAuthContext();
+
   return (
     <Card
       sx={{
@@ -39,7 +42,8 @@ export default function ContactCard({ data }) {
         </Typography>
         <Typography variant="body2">{data.phone}</Typography>
       </CardContent>
-      <Box mt={2}>
+
+      <Box mt={2} display="flex" gap={1}>
         <Button
           size="small"
           variant="contained"
@@ -48,6 +52,16 @@ export default function ContactCard({ data }) {
         >
           Contact
         </Button>
+        {user?.isAdmin && (
+          <Button
+            size="small"
+            variant="outlined"
+            color="error"
+            onClick={() => onDelete?.(data.id)}
+          >
+            Delete
+          </Button>
+        )}
       </Box>
     </Card>
   );

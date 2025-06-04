@@ -24,6 +24,9 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { addDoc } from "firebase/firestore";
+import TradeCardAdmin from "../components/TradeCardAdmin";
+
+
 
 function TabPanel({ children, value, index }) {
   return (
@@ -48,7 +51,22 @@ const Resources = () => {
     topic: "",
     duration: "",
   });
+  const [openContactDialog, setOpenContactDialog] = useState(false);
+  const [newContact, setNewContact] = useState({
+    name: "",
+    role: "",
+    email: "",
+    phone: "",
+    image: "",
+  });
   const [snackbarMsg, setSnackbarMsg] = useState("");
+  const [openTradeDialog, setOpenTradeDialog] = useState(false);
+  const [newTrade, setNewTrade] = useState({
+    name: "",
+    description: "",
+    category: "",
+  });
+
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -65,6 +83,30 @@ const Resources = () => {
     };
     fetchContacts();
   }, []);
+
+  const handleCreateContact = async () => {
+    try {
+      const docRef = await addDoc(collection(db, "contacts"), newContact);
+      setContacts((prev) => [...prev, { id: docRef.id, ...newContact }]);
+      setSnackbarMsg("Contact added successfully.");
+      setOpenContactDialog(false);
+      setNewContact({ name: "", role: "", email: "", phone: "", image: "" });
+    } catch (err) {
+      console.error("Error creating contact:", err);
+      setSnackbarMsg("Failed to create contact.");
+    }
+  };
+
+  const handleDeleteContact = async (id) => {
+    try {
+      await deleteDoc(doc(db, "contacts", id));
+      setContacts((prev) => prev.filter((c) => c.id !== id));
+      setSnackbarMsg("Contact deleted.");
+    } catch (err) {
+      console.error("Error deleting contact:", err);
+      setSnackbarMsg("Failed to delete contact.");
+    }
+  };
 
   const handleCreateTraining = async () => {
     try {
@@ -84,6 +126,20 @@ const Resources = () => {
       setSnackbarMsg("Failed to create training.");
     }
   };
+
+  const handleCreateTrade = async () => {
+    try {
+      const docRef = await addDoc(collection(db, "trades"), newTrade);
+      setTrades((prev) => [...prev, { id: docRef.id, ...newTrade }]);
+      setSnackbarMsg("Trade created successfully.");
+      setOpenTradeDialog(false);
+      setNewTrade({ name: "", description: "", category: "" });
+    } catch (err) {
+      console.error("Error creating trade:", err);
+      setSnackbarMsg("Failed to create trade.");
+    }
+  };
+  
 
   useEffect(() => {
     const fetchTrades = async () => {
@@ -192,7 +248,6 @@ const Resources = () => {
                   textTransform: "none",
                   mb: 2,
                   alignSelf: "flex-start",
-                  left: "-550px",
                 }}
               >
                 + Add Training
@@ -208,6 +263,21 @@ const Resources = () => {
           </TabPanel>
 
           <TabPanel value={tab} index={1}>
+            {user?.isAdmin && (
+              <Button
+                onClick={() => setOpenTradeDialog(true)}
+                sx={{
+                  border: "1px solid #f97316",
+                  color: "#f97316",
+                  textTransform: "none",
+                  mb: 2,
+                  alignSelf: "flex-start",
+                }}
+              >
+                + Add Trade
+              </Button>
+            )}
+
             {savedTrades.length > 0 && (
               <ResourcesTab
                 title="Your Trades"
@@ -219,16 +289,40 @@ const Resources = () => {
             <ResourcesTab
               title="Trade Information"
               data={trades}
-              CardComponent={TradeCard}
-              extraProps={{ savedTrades, setSavedTrades }}
+              CardComponent={user?.isAdmin ? TradeCardAdmin : TradeCard}
+              extraProps={
+                user?.isAdmin
+                  ? {
+                      onDelete: (id) =>
+                        setTrades(trades.filter((t) => t.id !== id)),
+                    }
+                  : { savedTrades, setSavedTrades }
+              }
             />
           </TabPanel>
 
           <TabPanel value={tab} index={2}>
+            {user?.isAdmin && (
+              <Button
+                onClick={() => setOpenContactDialog(true)}
+                sx={{
+                  border: "1px solid #f97316",
+                  color: "#f97316",
+                  textTransform: "none",
+                  mb: 2,
+                  alignSelf: "flex-start",
+                }}
+              >
+                + Add Contact
+              </Button>
+            )}
             <ResourcesTab
               title="Contacts"
               data={contacts}
               CardComponent={ContactCard}
+              extraProps={
+                user?.isAdmin ? { onDelete: handleDeleteContact } : {}
+              }
             />
           </TabPanel>
           <TabPanel value={tab} index={3}>
@@ -328,6 +422,93 @@ const Resources = () => {
         <DialogActions>
           <Button onClick={() => setOpenCreate(false)}>Cancel</Button>
           <Button onClick={handleCreateTraining} sx={{ color: "#f97316" }}>
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openTradeDialog} onClose={() => setOpenTradeDialog(false)}>
+        <DialogTitle>Create New Trade</DialogTitle>
+        <DialogContent
+          sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+        >
+          <TextField
+            label="Trade Name"
+            value={newTrade.name}
+            onChange={(e) => setNewTrade({ ...newTrade, name: e.target.value })}
+          />
+          <TextField
+            label="Category"
+            value={newTrade.category}
+            onChange={(e) =>
+              setNewTrade({ ...newTrade, category: e.target.value })
+            }
+          />
+          <TextField
+            label="Description"
+            multiline
+            minRows={3}
+            value={newTrade.description}
+            onChange={(e) =>
+              setNewTrade({ ...newTrade, description: e.target.value })
+            }
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenTradeDialog(false)}>Cancel</Button>
+          <Button onClick={handleCreateTrade} sx={{ color: "#f97316" }}>
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={openContactDialog}
+        onClose={() => setOpenContactDialog(false)}
+      >
+        <DialogTitle>Create New Contact</DialogTitle>
+        <DialogContent
+          sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+        >
+          <TextField
+            label="Name"
+            value={newContact.name}
+            onChange={(e) =>
+              setNewContact({ ...newContact, name: e.target.value })
+            }
+          />
+          <TextField
+            label="Role"
+            value={newContact.role}
+            onChange={(e) =>
+              setNewContact({ ...newContact, role: e.target.value })
+            }
+          />
+          <TextField
+            label="Email"
+            value={newContact.email}
+            onChange={(e) =>
+              setNewContact({ ...newContact, email: e.target.value })
+            }
+          />
+          <TextField
+            label="Phone"
+            value={newContact.phone}
+            onChange={(e) =>
+              setNewContact({ ...newContact, phone: e.target.value })
+            }
+          />
+          <TextField
+            label="Image URL"
+            value={newContact.image}
+            onChange={(e) =>
+              setNewContact({ ...newContact, image: e.target.value })
+            }
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenContactDialog(false)}>Cancel</Button>
+          <Button onClick={handleCreateContact} sx={{ color: "#f97316" }}>
             Create
           </Button>
         </DialogActions>
