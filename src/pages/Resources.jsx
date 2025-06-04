@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "../components/NavBar";
 import { Box, Tabs, Tab } from "@mui/material";
-import TrainingCardStudent from "../components/TrainingCardStudent";
+import TrainingCard from "../components/TrainingCardStudent";
 import TrainingCardAdmin from "../components/TrainingCardAdmin";
 import TradeCard from "../components/TradeCard";
 import ContactCard from "../components/ContactCard";
@@ -27,7 +27,6 @@ import { addDoc } from "firebase/firestore";
 import TradeCardAdmin from "../components/TradeCardAdmin";
 
 
-
 function TabPanel({ children, value, index }) {
   return (
     <div hidden={value !== index}>
@@ -45,6 +44,30 @@ const Resources = () => {
   const [savedTrades, setSavedTrades] = useState([]);
   const [savedTrainings, setSavedTrainings] = useState([]);
   const [savedContacts, setSavedContacts] = useState([]);
+  const [openCreate, setOpenCreate] = useState(false);
+  const [openTradeDialog, setOpenTradeDialog] = useState(false);
+  const [openContactDialog, setOpenContactDialog] = useState(false);
+  const [newTraining, setNewTraining] = useState({
+    title: "",
+    description: "",
+    instructor: "",
+    topic: "",
+    duration: "",
+  });
+  const [newTrade, setNewTrade] = useState({
+    name: "",
+    description: "",
+    category: "",
+  });
+  const [newContact, setNewContact] = useState({
+    name: "",
+    role: "",
+    email: "",
+    phone: "",
+    image: "",
+  });
+  const [snackbarMsg, setSnackbarMsg] = useState("");
+
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -66,7 +89,7 @@ const Resources = () => {
     try {
       const docRef = await addDoc(collection(db, "contacts"), newContact);
       setContacts((prev) => [...prev, { id: docRef.id, ...newContact }]);
-      setSnackbarMsg("Contact added successfully.");
+      set("Contact added successfully.");
       setOpenContactDialog(false);
       setNewContact({ name: "", role: "", email: "", phone: "", image: "" });
     } catch (err) {
