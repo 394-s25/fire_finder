@@ -151,7 +151,7 @@ const PostCard = ({ post, onSaveToggle }) => {
       return `${Math.floor(diffInHours / 24)}d ago`;
     }
   };
-
+  
   return (
     <Card
       sx={{
@@ -160,6 +160,7 @@ const PostCard = ({ post, onSaveToggle }) => {
         borderRadius: 2,
         width: "100%",
         maxWidth: "700px",
+        height: "auto",
         zIndex: -1,
       }}
     >
@@ -186,7 +187,7 @@ const PostCard = ({ post, onSaveToggle }) => {
         }
         sx={{ pb: 0.5, pt: 1.5 }}
       />
-      <CardContent sx={{ pt: 1.5, pb: 1.5, pl: 1.5, pr: 1.5 }}>
+      <CardContent sx={{ pt: 1.5, pb: 1.5, pl: 1.5, pr: 1.5, backgroundColor: "rgb(250, 250, 250)" }}>
         <Typography variant="body2" sx={{ fontSize: "0.9rem" }}>
           {post.text}
         </Typography>
@@ -212,6 +213,7 @@ const PostCard = ({ post, onSaveToggle }) => {
             scrollbarWidth: "thin",
             scrollbarColor: "rgb(120, 60, 60) #f1f1f1",
             scrollSnapType: "x mandatory",
+            backgroundColor: "rgb(250, 250, 250)" 
           }}
         >
           {post.images.map((img, idx) => (
@@ -220,13 +222,17 @@ const PostCard = ({ post, onSaveToggle }) => {
               component="img"
               sx={{
                 flex: "0 0 auto",
-                width: "300px",
-                height: "350px",
-                objectFit: "cover",
+                width: "auto", // Allow natural width
+                minWidth: "300px", // Prevent images from being too small
+                maxWidth: "690px", // Constrain max width
+                height: "auto", // Allow natural height
+                maxHeight: "400px", // Constrain max height
+                objectFit: "contain",
                 scrollSnapAlign: "center",
                 pr: 0.5,
                 pl: 0.5,
                 pb: 0.5,
+                backgroundColor: "rgb(250, 250, 250)" 
               }}
               image={img}
               alt={`Post image ${idx + 1}`}

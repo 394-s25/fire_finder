@@ -35,7 +35,7 @@ const SortDropdown = () => {
   return (
       <Box
         sx = {{
-          alignItems: 'center', display:"flex", justifyContent: "flex-start",}}>
+          alignItems: 'center', display:"flex", justifyContent: "flex-start", flexDirection :"row"}}>
         <Box
           sx={{
             width: "100%",
@@ -50,7 +50,7 @@ const SortDropdown = () => {
           value={sortOption}
           onChange={handleChange}
           input={<MinimalInput />}
-          sx={{ bgcolor: "transparent", left: "465px", top: "-26px" }}
+          sx={{ bgcolor: "transparent", }}
         >
           <MenuItem value="Popular">Popular</MenuItem>
           <MenuItem value="Date">Date</MenuItem>
