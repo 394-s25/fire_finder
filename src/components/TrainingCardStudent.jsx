@@ -7,7 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 
-export default function TrainingCard({ data }) {
+export default function TrainingCardStudent({ data }) {
   return (
     <Card
       sx={{
