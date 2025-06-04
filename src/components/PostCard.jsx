@@ -8,11 +8,15 @@ import {
   Typography,
   IconButton,
   Avatar,
+  Button,
+  LinearProgress,
 } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import ShareIcon from "@mui/icons-material/Share";
+import PollIcon from "@mui/icons-material/Poll";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useAuthContext } from "../services/userProvider";
 import {
   doc,
@@ -29,11 +33,32 @@ const PostCard = ({ post, onSaveToggle }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false);
+  const [currentVoteIndex, setCurrentVoteIndex] = useState(-1);
+  const [pollOptions, setPollOptions] = useState([]);
 
   useEffect(() => {
     if (post) {
       setLiked(post.likedBy?.includes(user?.uid) || false);
       setLikeCount(post.likes || 0);
+
+      // Initialize poll data if it's a poll
+      if (post.isPoll && post.pollOptions) {
+        setPollOptions(post.pollOptions);
+        
+        // Find which option the user voted for
+        let userVoteIndex = -1;
+        const userHasVoted = post.pollOptions.some((option, index) => {
+          if (option.votedBy?.includes(user?.uid)) {
+            userVoteIndex = index;
+            return true;
+          }
+          return false;
+        });
+        
+        setHasVoted(userHasVoted);
+        setCurrentVoteIndex(userVoteIndex);
+      }
 
       const checkIfSaved = async () => {
         if (!user || !post?.id) return;
@@ -52,6 +77,23 @@ const PostCard = ({ post, onSaveToggle }) => {
       checkIfSaved();
     }
   }, [user, post]);
+
+  const isPollActive = () => {
+    if (!post.isPoll) return false;
+    if (!post.pollEndTime) return true; // No end time means always active
+    const now = new Date();
+    const endTime = post.pollEndTime.toDate ? post.pollEndTime.toDate() : new Date(post.pollEndTime);
+    return now < endTime;
+  };
+
+  const getTotalVotes = () => {
+    return pollOptions.reduce((total, option) => total + (option.votes || 0), 0);
+  };
+
+  const getVotePercentage = (votes) => {
+    const total = getTotalVotes();
+    return total > 0 ? (votes / total) * 100 : 0;
+  };
 
   const toggleLike = async () => {
     if (!user || !post?.id) return;
@@ -76,7 +118,6 @@ const PostCard = ({ post, onSaveToggle }) => {
       }
     } catch (error) {
       console.error("Error toggling like:", error);
-
       setLiked((prev) => !prev);
       setLikeCount((prev) => (liked ? prev + 1 : prev - 1));
     }
@@ -106,6 +147,46 @@ const PostCard = ({ post, onSaveToggle }) => {
     } catch (error) {
       console.error("Error toggling save:", error);
       setIsSaved((prev) => !prev);
+    }
+  };
+
+  const handleVote = async (optionIndex) => {
+    if (!user || !post?.id || !isPollActive()) return;
+
+    try {
+      const postRef = doc(db, "posts", post.id);
+      const updatedOptions = [...pollOptions];
+      
+      // If user already voted, remove their previous vote
+      if (hasVoted && currentVoteIndex !== -1) {
+        updatedOptions[currentVoteIndex].votes = Math.max(0, (updatedOptions[currentVoteIndex].votes || 0) - 1);
+        updatedOptions[currentVoteIndex].votedBy = updatedOptions[currentVoteIndex].votedBy?.filter(uid => uid !== user.uid) || [];
+      }
+      
+      // Add vote to selected option
+      updatedOptions[optionIndex].votes = (updatedOptions[optionIndex].votes || 0) + 1;
+      updatedOptions[optionIndex].votedBy = updatedOptions[optionIndex].votedBy || [];
+      updatedOptions[optionIndex].votedBy.push(user.uid);
+
+      // Update local state
+      setPollOptions(updatedOptions);
+      setHasVoted(true);
+      setCurrentVoteIndex(optionIndex);
+
+      // Update Firestore
+      await updateDoc(postRef, {
+        pollOptions: updatedOptions
+      });
+
+    } catch (error) {
+      console.error("Error voting:", error);
+      // Revert local state on error
+      setPollOptions(post.pollOptions);
+      const userVoteIndex = post.pollOptions.findIndex(option => 
+        option.votedBy?.includes(user?.uid)
+      );
+      setHasVoted(userVoteIndex !== -1);
+      setCurrentVoteIndex(userVoteIndex);
     }
   };
 
@@ -151,6 +232,23 @@ const PostCard = ({ post, onSaveToggle }) => {
       return `${Math.floor(diffInHours / 24)}d ago`;
     }
   };
+
+  const formatPollEndTime = () => {
+    if (!post.pollEndTime) return null;
+    const endTime = post.pollEndTime.toDate ? post.pollEndTime.toDate() : new Date(post.pollEndTime);
+    const now = new Date();
+    
+    if (now >= endTime) {
+      return "Poll ended";
+    }
+    
+    const diffInHours = (endTime - now) / (1000 * 60 * 60);
+    if (diffInHours < 24) {
+      return `${Math.floor(diffInHours)}h left`;
+    } else {
+      return `${Math.floor(diffInHours / 24)}d left`;
+    }
+  };
   
   return (
     <Card
@@ -174,9 +272,14 @@ const PostCard = ({ post, onSaveToggle }) => {
               flexDirection: "column",
             }}
           >
-            <Typography variant="h6" sx={{ fontSize: "1.1rem" }}>
-              {post.authorName || post.author || "Anonymous"}
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography variant="h6" sx={{ fontSize: "1.1rem" }}>
+                {post.authorName || post.author || "Anonymous"}
+              </Typography>
+              {post.isPoll && (
+                <PollIcon sx={{ color: "rgb(175, 4, 4)", fontSize: "1.1rem" }} />
+              )}
+            </Box>
             <Typography
               variant="caption"
               sx={{ fontSize: "0.8rem", color: "gray" }}
@@ -187,12 +290,123 @@ const PostCard = ({ post, onSaveToggle }) => {
         }
         sx={{ pb: 0.5, pt: 1.5 }}
       />
+      
       <CardContent sx={{ pt: 1.5, pb: 1.5, pl: 1.5, pr: 1.5, backgroundColor: "rgb(250, 250, 250)" }}>
-        <Typography variant="body2" sx={{ fontSize: "0.9rem" }}>
+        <Typography variant="body2" sx={{ fontSize: "0.9rem", mb: post.isPoll ? 2 : 0 }}>
           {post.text}
         </Typography>
+        
+        {/* Poll Options */}
+        {post.isPoll && (
+          <Box>
+            {pollOptions.map((option, index) => {
+              const isCurrentVote = currentVoteIndex === index;
+              const canVote = isPollActive();
+              
+              return (
+                <Box key={index} sx={{ mb: 1 }}>
+                  <Button
+                    fullWidth
+                    variant={hasVoted ? "outlined" : "contained"}
+                    onClick={() => handleVote(index)}
+                    disabled={!canVote}
+                    sx={{
+                      justifyContent: "flex-start",
+                      textAlign: "left",
+                      position: "relative",
+                      backgroundColor: hasVoted ? "transparent" : "white",
+                      color: hasVoted ? (isCurrentVote ? "rgb(175, 4, 4)" : "rgb(120, 60, 60)") : "rgb(175, 4, 4)",
+                      borderColor: isCurrentVote ? "rgb(175, 4, 4)" : "rgb(175, 4, 4)",
+                      borderWidth: isCurrentVote ? 2 : 1,
+                      "&:hover": {
+                        backgroundColor: hasVoted ? "rgba(175, 4, 4, 0.1)" : "rgba(175, 4, 4, 0.9)",
+                        borderColor: "rgb(175, 4, 4)",
+                      },
+                      "&:disabled": {
+                        backgroundColor: hasVoted ? "transparent" : "rgba(0, 0, 0, 0.12)",
+                        color: hasVoted ? (isCurrentVote ? "rgb(175, 4, 4)" : "rgb(120, 60, 60)") : "rgba(0, 0, 0, 0.26)",
+                        borderColor: isCurrentVote ? "rgb(175, 4, 4)" : "rgba(0, 0, 0, 0.26)",
+                      },
+                    }}
+                  >
+                    <Box sx={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        {isCurrentVote && (
+                          <CheckCircleIcon 
+                            sx={{ 
+                              fontSize: "1rem", 
+                              color: canVote ? "rgb(175, 4, 4)" : "rgb(120, 60, 60)" 
+                            }} 
+                          />
+                        )}
+                        <Typography sx={{ fontSize: "0.9rem" }}>
+                          {option.text}
+                        </Typography>
+                      </Box>
+                      {hasVoted && (
+                        <Typography sx={{ fontSize: "0.8rem", fontWeight: "bold" }}>
+                          {option.votes || 0} ({Math.round(getVotePercentage(option.votes || 0))}%)
+                        </Typography>
+                      )}
+                    </Box>
+                    {hasVoted && (
+                      <LinearProgress
+                        variant="determinate"
+                        value={getVotePercentage(option.votes || 0)}
+                        sx={{
+                          position: "absolute",
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          height: 3,
+                          backgroundColor: "rgba(175, 4, 4, 0.1)",
+                          "& .MuiLinearProgress-bar": {
+                            backgroundColor: isCurrentVote ? "rgb(175, 4, 4)" : "rgb(120, 60, 60)",
+                          },
+                        }}
+                      />
+                    )}
+                  </Button>
+                </Box>
+              );
+            })}
+            
+            {/* Poll Status */}
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
+              <Typography variant="caption" sx={{ color: "gray" }}>
+                {getTotalVotes()} votes
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                {hasVoted && isPollActive() && (
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      color: "rgb(175, 4, 4)",
+                      fontStyle: "italic"
+                    }}
+                  >
+                    Click another option to change your vote
+                  </Typography>
+                )}
+                {post.pollEndTime && (
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      color: isPollActive() ? "rgb(175, 4, 4)" : "gray",
+                      fontWeight: isPollActive() ? "bold" : "normal"
+                    }}
+                  >
+                    {formatPollEndTime()}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          </Box>
+        )}
       </CardContent>
-      {post.images?.length > 0 && (
+      
+      {/* Regular Post Images */}
+      {!post.isPoll && post.images?.length > 0 && (
         <Box
           sx={{
             display: "flex",
@@ -204,7 +418,7 @@ const PostCard = ({ post, onSaveToggle }) => {
               background: "#f1f1f1",
             },
             "&::-webkit-scrollbar-thumb": {
-              background: "rgb(120, 60, 60)", // Reddish-maroon
+              background: "rgb(120, 60, 60)",
               borderRadius: "4px",
             },
             "&::-webkit-scrollbar-thumb:hover": {
@@ -222,11 +436,11 @@ const PostCard = ({ post, onSaveToggle }) => {
               component="img"
               sx={{
                 flex: "0 0 auto",
-                width: "auto", // Allow natural width
-                minWidth: "300px", // Prevent images from being too small
-                maxWidth: "690px", // Constrain max width
-                height: "auto", // Allow natural height
-                maxHeight: "400px", // Constrain max height
+                width: "auto",
+                minWidth: "300px",
+                maxWidth: "690px",
+                height: "auto",
+                maxHeight: "400px",
                 objectFit: "contain",
                 scrollSnapAlign: "center",
                 pr: 0.5,
@@ -240,6 +454,8 @@ const PostCard = ({ post, onSaveToggle }) => {
           ))}
         </Box>
       )}
+      
+      {/* Action Buttons */}
       <Box
         sx={{
           display: "flex",
