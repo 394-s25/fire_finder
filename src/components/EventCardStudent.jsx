@@ -12,6 +12,7 @@ import EventDetails from "./EventDetails";
 import banner from "../imgs/logo.png"; // Default banner image
 
 const EventCardStudent = ({
+  type,
   id,
   title,
   description,
@@ -24,9 +25,15 @@ const EventCardStudent = ({
   const [isSaved, setIsSaved] = useState(false);
   const [isRSVPd, setIsRSVPd] = useState(false);
   const [isEventOpen, setIsEventOpen] = useState(false);
-
+  
   const studentRef = doc(db, "students", user.uid);
   const eventRef = doc(db, "events", id);
+
+  // Check if event is in the future
+  const isFutureEvent = startDate && startDate > new Date();
+
+  // Determine if checkboxes should be shown
+  const showCheckboxes = (type === "allevents" || type === "rsvpd" || type === "saved");
 
   // Fetch student and event data to set RSVP and saved states
   useEffect(() => {
@@ -218,87 +225,91 @@ const EventCardStudent = ({
               ))}
             </div>
             <div style={{ flexGrow: 5 }} />
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                paddingBottom: "0.5rem",
-                paddingRight: "0.5rem",
-                paddingLeft: "0.5rem",
-              }}
-            >
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={isRSVPd}
-                    onChange={(e) => toggleRSVP(e)}
-                    onClick={(e) => e.stopPropagation()} // Stop click propagation
+            {showCheckboxes && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  paddingBottom: "0.5rem",
+                  paddingRight: "0.5rem",
+                  paddingLeft: "0.5rem",
+                }}
+              >
+                {isFutureEvent && (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={isRSVPd}
+                        onChange={(e) => toggleRSVP(e)}
+                        onClick={(e) => e.stopPropagation()} // Stop click propagation
+                        sx={{
+                          color: "#f97316",
+                          "&.Mui-checked": { color: "#f97316" },
+                          padding: "4px",
+                        }}
+                      />
+                    }
+                    label="RSVP"
                     sx={{
+                      border: "1px solid #f97316",
+                      borderRadius: "0.25rem",
+                      padding: "0 8px",
+                      margin: 0,
                       color: "#f97316",
-                      "&.Mui-checked": { color: "#f97316" },
-                      padding: "4px",
+                      "&:hover": {
+                        backgroundColor: "rgba(249, 115, 22, 0.05)",
+                      },
                     }}
                   />
-                }
-                label="RSVP"
-                sx={{
-                  border: "1px solid #f97316",
-                  borderRadius: "0.25rem",
-                  padding: "0 8px",
-                  margin: 0,
-                  color: "#f97316",
-                  "&:hover": {
-                    backgroundColor: "rgba(249, 115, 22, 0.05)",
-                  },
-                }}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={isSaved}
-                    onChange={(e) => toggleSave(e)}
-                    onClick={(e) => e.stopPropagation()} // Stop click propagation
-                    sx={{
-                      color: "#f97316",
-                      "&.Mui-checked": { color: "#f97316" },
-                      padding: "4px",
-                    }}
-                  />
-                }
-                label="Save"
-                sx={{
-                  border: "1px solid #f97316",
-                  borderRadius: "0.25rem",
-                  padding: "0 8px",
-                  margin: 0,
-                  color: "#f97316",
-                  "&:hover": {
-                    backgroundColor: "rgba(249, 115, 22, 0.05)",
-                  },
-                }}
-              />
-              {isRSVPd && (
-                <a
-                  href={getGoogleCalendarUrl({
-                    title,
-                    description,
-                    startDate,
-                    endDate,
-                    location,
-                  })}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    sx={{ borderColor: "#f97316", color: "#f97316" }}
+                )}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={isSaved}
+                      onChange={(e) => toggleSave(e)}
+                      onClick={(e) => e.stopPropagation()} // Stop click propagation
+                      sx={{
+                        color: "#f97316",
+                        "&.Mui-checked": { color: "#f97316" },
+                        padding: "4px",
+                      }}
+                    />
+                  }
+                  label="Save"
+                  sx={{
+                    border: "1px solid #f97316",
+                    borderRadius: "0.25rem",
+                    padding: "0 8px",
+                    margin: 0,
+                    color: "#f97316",
+                    "&:hover": {
+                      backgroundColor: "rgba(249, 115, 22, 0.05)",
+                    },
+                  }}
+                />
+                {isRSVPd && (
+                  <a
+                    href={getGoogleCalendarUrl({
+                      title,
+                      description,
+                      startDate,
+                      endDate,
+                      location,
+                    })}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    Add to Calendar
-                  </Button>
-                </a>
-              )}
-            </div>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      sx={{ borderColor: "#f97316", color: "#f97316" }}
+                    >
+                      Add to Calendar
+                    </Button>
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         </CardActionArea>
       </Card>

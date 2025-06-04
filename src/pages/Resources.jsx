@@ -43,30 +43,8 @@ const Resources = () => {
   const [trades, setTrades] = useState([]);
   const [trainings, setTrainings] = useState([]);
   const [savedTrades, setSavedTrades] = useState([]);
-  const [openCreate, setOpenCreate] = useState(false);
-  const [newTraining, setNewTraining] = useState({
-    title: "",
-    description: "",
-    instructor: "",
-    topic: "",
-    duration: "",
-  });
-  const [openContactDialog, setOpenContactDialog] = useState(false);
-  const [newContact, setNewContact] = useState({
-    name: "",
-    role: "",
-    email: "",
-    phone: "",
-    image: "",
-  });
-  const [snackbarMsg, setSnackbarMsg] = useState("");
-  const [openTradeDialog, setOpenTradeDialog] = useState(false);
-  const [newTrade, setNewTrade] = useState({
-    name: "",
-    description: "",
-    category: "",
-  });
-
+  const [savedTrainings, setSavedTrainings] = useState([]);
+  const [savedContacts, setSavedContacts] = useState([]);
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -171,8 +149,44 @@ const Resources = () => {
         console.error("Error fetching saved trades: ", error);
       }
     };
+    const fetchSavedTrainings = async () => {
+      try {
+        if (!user) return;
+        const studentDoc = await getDoc(doc(db, "students", user.uid));
+        if (!studentDoc.exists()) return;
+        const refs = studentDoc.data().trainings || [];
+        const trainings = await Promise.all(
+          refs.map(async (ref) => {
+            const snap = await getDoc(ref);
+            return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+          })
+        );
+        setSavedTrainings(trainings.filter(Boolean));
+      } catch (error) {
+        console.error("Error fetching saved trainings: ", error);
+      }
+    };
+    const fetchSavedContacts = async () => {
+      try {
+        if (!user) return;
+        const studentDoc = await getDoc(doc(db, "students", user.uid));
+        if (!studentDoc.exists()) return;
+        const refs = studentDoc.data().contacts || [];
+        const contacts = await Promise.all(
+          refs.map(async (ref) => {
+            const snap = await getDoc(ref);
+            return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+          })
+        );
+        setSavedContacts(contacts.filter(Boolean));
+      } catch (error) {
+        console.error("Error fetching saved contacts: ", error);
+      }
+    };
     fetchTrades();
     fetchSavedTrades();
+    fetchSavedTrainings();
+    fetchSavedContacts();
   }, [user]);
 
   useEffect(() => {
@@ -256,36 +270,12 @@ const Resources = () => {
             <ResourcesTab
               title="Training Resources"
               data={trainings}
-              CardComponent={
-                user?.isAdmin ? TrainingCardAdmin : TrainingCardStudent
-              }
+              CardComponent={TrainingCard}
+              extraProps={{ savedTrainings, setSavedTrainings }}
             />
           </TabPanel>
 
           <TabPanel value={tab} index={1}>
-            {user?.isAdmin && (
-              <Button
-                onClick={() => setOpenTradeDialog(true)}
-                sx={{
-                  border: "1px solid #f97316",
-                  color: "#f97316",
-                  textTransform: "none",
-                  mb: 2,
-                  alignSelf: "flex-start",
-                }}
-              >
-                + Add Trade
-              </Button>
-            )}
-
-            {savedTrades.length > 0 && (
-              <ResourcesTab
-                title="Your Trades"
-                data={savedTrades}
-                CardComponent={TradeCard}
-                extraProps={{ savedTrades, setSavedTrades }}
-              />
-            )}
             <ResourcesTab
               title="Trade Information"
               data={trades}
@@ -320,58 +310,55 @@ const Resources = () => {
               title="Contacts"
               data={contacts}
               CardComponent={ContactCard}
-              extraProps={
-                user?.isAdmin ? { onDelete: handleDeleteContact } : {}
-              }
+              extraProps={{ savedContacts, setSavedContacts }}
             />
           </TabPanel>
           <TabPanel value={tab} index={3}>
-            <Box
-              sx={{
-                flexDirection: "column",
-                display: "flex",
-                justifyContent: "flex-start",
-                mt: -3,
-              }}
-            >
-              <h1 style={{ fontWeight: "lighter" }}>My Resources</h1>
-              <Box>
-                <Accordion>
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    sx={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
-                  >
-                    <Typography sx={{ fontSize: 23, fontWeight: "500" }}>
-                      Trades
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails></AccordionDetails>
-                </Accordion>
-
-                <Accordion>
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    sx={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
-                  >
-                    <Typography sx={{ fontSize: 23, fontWeight: "500" }}>
-                      Trainings
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails></AccordionDetails>
-                </Accordion>
-
-                <Accordion>
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    sx={{ backgroundColor: "rgba(0, 0, 0, 0.1)" }}
-                  >
-                    <Typography sx={{ fontSize: 23, fontWeight: "500" }}>
-                      Contacts
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails></AccordionDetails>
-                </Accordion>
-              </Box>
+            <Box sx={{flexDirection: "column", display: "flex", justifyContent:"flex-start", mt: -3}}>
+                <h1 style = {{fontWeight:"lighter"}}>My Resources</h1>
+                <Box>
+                  <Accordion>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />} sx = {{backgroundColor:"rgba(0, 0, 0, 0.1)"}}>
+                      <Typography sx = {{fontSize:23, fontWeight:"500"}}>Trades</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <ResourcesTab
+                        title="Your Saved Trades"
+                        data={savedTrades}
+                        CardComponent={TradeCard}
+                        extraProps={{ savedTrades, setSavedTrades }}
+                      />
+                    </AccordionDetails>
+                  </Accordion>
+                  
+                  <Accordion>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />} sx = {{backgroundColor:"rgba(0, 0, 0, 0.1)"}}>
+                      <Typography sx = {{fontSize:23, fontWeight:"500"}}>Trainings</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <ResourcesTab
+                        title="Your Saved Trainings"
+                        data={savedTrainings}
+                        CardComponent={TrainingCard}
+                        extraProps={{ savedTrainings, setSavedTrainings }}
+                      />
+                    </AccordionDetails>
+                  </Accordion>
+                  
+                  <Accordion>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />} sx = {{backgroundColor:"rgba(0, 0, 0, 0.1)"}}>
+                      <Typography sx = {{fontSize:23, fontWeight:"500"}}>Contacts</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <ResourcesTab
+                        title="Your Saved Contacts"
+                        data={savedContacts}
+                        CardComponent={ContactCard}
+                        extraProps={{ savedContacts, setSavedContacts }}
+                      />
+                    </AccordionDetails>
+                  </Accordion>
+                </Box>
             </Box>
           </TabPanel>
         </Box>
