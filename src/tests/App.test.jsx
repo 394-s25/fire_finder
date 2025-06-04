@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import App from "./App";
-import { UserProvider } from "./services/userProvider";
+import App from "../App";
+import { UserProvider } from "../services/userProvider";
 import "@testing-library/jest-dom";
 
 vi.mock("./services/userProvider", () => ({
