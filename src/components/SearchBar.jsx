@@ -22,15 +22,6 @@ const SearchBar = ({ value, onChange }) => {
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder="Search"
-      sx={{
-        bgcolor: "transparent",
-        position: "fixed",
-        top: { xs: "260px", sm: "190px", md: "95px" },
-        left: { xs: "10px", sm: "15px", md: "1100px" },
-        width: { xs: "90%", sm: "80%", md: "15%" },
-        bottompadding: "15px",
-        zIndex: -1,
-      }}
     />
   );
 };

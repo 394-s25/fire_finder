@@ -33,43 +33,17 @@ const SortDropdown = () => {
   };
   
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        width: "auto", // Let parent flex handle width
-        position: "fixed",
-        top: "130px", // Adjusted to match the tabs
-        zIndex: -1, // Adjusted to match the tabs
-      }}
-    >
-      {/* Horizontal line */}
       <Box
-        sx={{
-          position: "fixed",
-          top: "145px", // Align with the tabs
-          left: "35px", // Adjusted to start from sidebar edge (300px - 50px buffer)
-          right: "180px",
-          height: "1px",
-          bgcolor: "gray", // Match the "Sort" label color
-          zIndex: -1, // Ensure line is behind text
-          bottompadding: "10px",
-        }}
-      />
-      {/* Sort label and dropdown */}
-      <Box
-        sx={{
-          position: "fixed",
-          top: "137px",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          pr: 1,
-          left: "700px",
-          zIndex: -1, // Adjusted to align with the dropdown
-          bottompadding: "10px",
-        }}
-      >
-        <Typography variant="body2" sx={{ mr: -100, color: "gray" }}>
+        sx = {{
+          alignItems: 'center', display:"flex", justifyContent: "flex-start",}}>
+        <Box
+          sx={{
+            width: "100%",
+            height: "1px",
+            bgcolor: 'rgba(0, 0, 0, 0.2)',
+          }}
+        />
+        <Typography variant="body2" sx = {{ ml:1}}>
           Sort:
         </Typography>
         <Select
@@ -83,7 +57,6 @@ const SortDropdown = () => {
           <MenuItem value="Newest">Newest</MenuItem>
         </Select>
       </Box>
-    </Box>
   );
 };
 
