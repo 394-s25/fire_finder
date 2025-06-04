@@ -33,19 +33,6 @@ const SortDropdown = () => {
   };
   
   return (
-<<<<<<< HEAD
-      <Box
-        sx = {{
-          alignItems: 'center', display:"flex", justifyContent: "flex-start",}}>
-        <Box
-          sx={{
-            width: "100%",
-            height: "1px",
-            bgcolor: 'rgba(0, 0, 0, 0.2)',
-          }}
-        />
-        <Typography variant="body2" sx = {{ ml:1}}>
-=======
     <Box
       sx={{
         display: "flex",
@@ -83,7 +70,6 @@ const SortDropdown = () => {
         }}
       >
         <Typography variant="body2" sx={{ mr: -100, color: "gray" }}>
->>>>>>> 65a11e4afcad14f8cf5f82851155c39267abfb39
           Sort:
         </Typography>
         <Select
@@ -97,6 +83,7 @@ const SortDropdown = () => {
           <MenuItem value="Newest">Newest</MenuItem>
         </Select>
       </Box>
+    </Box>
   );
 };
 
