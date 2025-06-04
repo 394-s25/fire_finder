@@ -20,6 +20,7 @@ import {
 import AdminAccess from "../components/adminAccess";
 import TotalStudentsCard from "../components/TotalStudentsCard";
 import UpcomingEventCard from "../components/UpcomingEventCard";
+import TradeInterestChart from "../components/TradeInterestChart";
 
 export default function Admin() {
   const { user } = useAuthContext();
@@ -107,6 +108,10 @@ export default function Admin() {
               percentChange={rsvpChange}
             />
           )}
+        </Box>
+        {/* Trade Interest Chart */}
+        <Box sx={{ mb: 4 }}>
+          <TradeInterestChart height={400} />
         </Box>
         <Box sx={{ mt: 4 }}>
           {loading ? (
