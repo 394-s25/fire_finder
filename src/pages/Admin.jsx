@@ -59,11 +59,11 @@ export default function Admin() {
         return {
           id: doc.id,
           name: data.title || "Unnamed Event",
-          startDate: data.startDate?.toDate(), // FIXED this line
+          startDate: data.startDate?.toDate?.(), // safely call toDate if exists
           rsvpCount: Array.isArray(data.rsvp) ? data.rsvp.length : 0,
         };
       })
-      .filter((event) => event.startDate); // Filter out any invalid entries
+      .filter((event) => event.startDate); // Ensure valid dates
 
     const today = new Date();
 
@@ -78,9 +78,13 @@ export default function Admin() {
     setUpcomingEvent(upcoming || null);
     setPreviousEvent(previous || null);
 
-    if (upcoming && previous && previous.rsvpCount > 0) {
+    if (upcoming) {
+      const previousCount = previous?.rsvpCount ?? 0;
       const change =
-        ((upcoming.rsvpCount - previous.rsvpCount) / previous.rsvpCount) * 100;
+        previousCount === 0
+          ? 0 // Show 0% if no previous data
+          : ((upcoming.rsvpCount - previousCount) / previousCount) * 100;
+
       setRsvpChange(Math.round(change * 10) / 10);
     }
   };
