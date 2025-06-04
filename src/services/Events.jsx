@@ -47,7 +47,8 @@ export const createEvent = async (eventData, imageFile) => {
 
         // Write to Firestore
         const docRef = await addDoc(collection(db, 'events'), event);
-
+        return { id: docRef.id, ...event }; // Return the created event with its ID
+        
         //return { id: docRef.id, ...event };
     } catch (error) {
         console.error('Error creating event:', error);
