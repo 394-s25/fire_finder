@@ -6,7 +6,6 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDoc,
   getDocs,
   setDoc,
 } from "firebase/firestore";
@@ -18,6 +17,9 @@ import {
   Paper,
   Button,
 } from "@mui/material";
+import AdminAccess from "../components/adminAccess";
+import TotalStudentsCard from "../components/TotalStudentsCard";
+import UpcomingEventCard from "../components/UpcomingEventCard";
 
 export default function Admin() {
   const { user } = useAuthContext();
@@ -25,7 +27,18 @@ export default function Admin() {
 
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
+  const [upcomingEvent, setUpcomingEvent] = useState(null);
+  const [previousEvent, setPreviousEvent] = useState(null);
+  const [rsvpChange, setRsvpChange] = useState(null);
+  const [totalStudents, setTotalStudents] = useState(null);
+
+  useEffect(() => {
+    fetchRequests();
+    fetchEventStats();
+    fetchTotalStudents();
+  }, []);
+
   const fetchRequests = async () => {
     const snapshot = await getDocs(collection(db, "admin_requests"));
     const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
@@ -33,9 +46,44 @@ export default function Admin() {
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchRequests();
-  }, []);
+  const fetchTotalStudents = async () => {
+    const snapshot = await getDocs(collection(db, "students"));
+    setTotalStudents(snapshot.size);
+  };
+
+  const fetchEventStats = async () => {
+    const snapshot = await getDocs(collection(db, "events"));
+    const events = snapshot.docs
+      .map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.title || "Unnamed Event",
+          startDate: data.startDate?.toDate(), // FIXED this line
+          rsvpCount: Array.isArray(data.rsvp) ? data.rsvp.length : 0,
+        };
+      })
+      .filter((event) => event.startDate); // Filter out any invalid entries
+
+    const today = new Date();
+
+    const upcoming = events
+      .filter((e) => e.startDate > today)
+      .sort((a, b) => a.startDate - b.startDate)[0];
+
+    const previous = events
+      .filter((e) => e.startDate <= today)
+      .sort((a, b) => b.startDate - a.startDate)[0];
+
+    setUpcomingEvent(upcoming || null);
+    setPreviousEvent(previous || null);
+
+    if (upcoming && previous && previous.rsvpCount > 0) {
+      const change =
+        ((upcoming.rsvpCount - previous.rsvpCount) / previous.rsvpCount) * 100;
+      setRsvpChange(Math.round(change * 10) / 10);
+    }
+  };
 
   const approveRequest = async (request) => {
     const studentRef = doc(db, "students", request.uid);
@@ -47,40 +95,26 @@ export default function Admin() {
   return (
     <>
       <Navbar />
-      <Box sx={{ pt: "112px", px: 2, maxWidth: 800, mx: "auto" }}>
-        <Typography variant="h5" gutterBottom>
-          Admin Requests
-        </Typography>
-        {loading ? (
-          <CircularProgress />
-        ) : requests.length === 0 ? (
-          <Typography>No pending requests</Typography>
-        ) : (
-          requests.map((req) => (
-            <Paper
-              key={req.id}
-              sx={{
-                mb: 2,
-                p: 2,
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Box>
-                <Typography>
-                  {req.displayName} - {req.email}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Requested: {req.timestamp?.toDate().toLocaleString()}
-                </Typography>
-              </Box>
-              <Button variant="contained" onClick={() => approveRequest(req)}>
-                Approve
-              </Button>
-            </Paper>
-          ))
-        )}
+      <Box sx={{ pt: "112px", px: 2, maxWidth: 900, mx: "auto" }}>
+        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+          {totalStudents !== null && (
+            <TotalStudentsCard total={totalStudents} />
+          )}
+          {upcomingEvent && rsvpChange !== null && (
+            <UpcomingEventCard
+              name={upcomingEvent.name}
+              rsvps={upcomingEvent.rsvpCount}
+              percentChange={rsvpChange}
+            />
+          )}
+        </Box>
+        <Box sx={{ mt: 4 }}>
+          {loading ? (
+            <CircularProgress />
+          ) : (
+            <AdminAccess requests={requests} approveRequest={approveRequest} />
+          )}
+        </Box>
       </Box>
     </>
   );

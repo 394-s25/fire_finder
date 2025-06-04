@@ -11,7 +11,7 @@ import { db } from "../services/firestoreConfig";
 import EventDetails from "./EventDetails";
 import banner from "../imgs/logo.png"; // Default banner image
 
-const EventCard = ({
+const EventCardStudent = ({
   id,
   title,
   description,
@@ -321,4 +321,4 @@ const EventCard = ({
   );
 };
 
-export default EventCard;
+export default EventCardStudent;

@@ -50,7 +50,7 @@ const SortDropdown = () => {
           value={sortOption}
           onChange={handleChange}
           input={<MinimalInput />}
-          sx = {{ml: -3}}
+          sx={{ bgcolor: "transparent", left: "465px", top: "-26px" }}
         >
           <MenuItem value="Popular">Popular</MenuItem>
           <MenuItem value="Date">Date</MenuItem>
