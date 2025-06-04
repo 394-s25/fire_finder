@@ -11,6 +11,7 @@ import banner from "../imgs/banner.png";
 import { useAuthContext } from "../services/userProvider";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../services/firestoreConfig";
+import CryptoJS from "crypto-js";
 
 const ProfileCard = () => {
   const { user } = useAuthContext();
@@ -29,7 +30,7 @@ const ProfileCard = () => {
     };
     fetchStudent();
   }, [user]);
-
+  
   return (
     <Box sx={{ mb: 3, position: "relative" }}>
       <Card
@@ -66,8 +67,8 @@ const ProfileCard = () => {
               mb: 1,
               border: "3px solid white",
             }}
-            alt={student?.displayName || "userProfile"}
-            src={student?.profilePicture || ""}
+            src={user?.photoURL || `https://www.gravatar.com/avatar/${CryptoJS.MD5((user?.email || '').toLowerCase().trim())}?s=80&d=wavatar`}
+            alt={student?.displayName || user?.displayName || "User Avatar"}
           />
           <Typography
             variant="h6"
@@ -78,7 +79,7 @@ const ProfileCard = () => {
               fontSize: "1.1rem",
             }}
           >
-            {student?.displayName || "USERNAME"}
+            {student?.displayName || user?.displayName|| "USERNAME"}
           </Typography>
           <Typography
             variant="body2"
