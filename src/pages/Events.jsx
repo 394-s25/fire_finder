@@ -256,6 +256,67 @@ const Events = () => {
           )}
         </div>
       </div>
+      <Dialog open={openCreate} onClose={() => setOpenCreate(false)}>
+        <DialogTitle>Create New Event</DialogTitle>
+        <DialogContent
+          sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+        >
+          <TextField
+            label="Title"
+            value={newEvent.title}
+            onChange={(e) =>
+              setNewEvent({ ...newEvent, title: e.target.value })
+            }
+          />
+          <TextField
+            label="Description"
+            multiline
+            minRows={3}
+            value={newEvent.description}
+            onChange={(e) =>
+              setNewEvent({ ...newEvent, description: e.target.value })
+            }
+          />
+          <TextField
+            label="Location"
+            value={newEvent.location}
+            onChange={(e) =>
+              setNewEvent({ ...newEvent, location: e.target.value })
+            }
+          />
+          <TextField
+            label="Image URL"
+            value={newEvent.imageUrl}
+            onChange={(e) =>
+              setNewEvent({ ...newEvent, imageUrl: e.target.value })
+            }
+          />
+          <TextField
+            label="Start Date & Time"
+            type="datetime-local"
+            value={newEvent.startDate}
+            onChange={(e) =>
+              setNewEvent({ ...newEvent, startDate: e.target.value })
+            }
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            label="End Date & Time"
+            type="datetime-local"
+            value={newEvent.endDate}
+            onChange={(e) =>
+              setNewEvent({ ...newEvent, endDate: e.target.value })
+            }
+            InputLabelProps={{ shrink: true }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenCreate(false)}>Cancel</Button>
+          <Button onClick={handleCreateEvent} sx={{ color: "#f97316" }}>
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
