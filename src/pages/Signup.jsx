@@ -37,7 +37,7 @@ export default function SignupPage() {
       timestamp: new Date(),
     });
   };
-
+  
   const signupWithEmail = async () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -47,7 +47,7 @@ export default function SignupPage() {
       );
       await updateProfile(userCredential.user, { displayName });
       if (requestAdmin) {
-        await submitAdminRequest(cred.user);
+        await submitAdminRequest(userCredential.user);
         setSnackbarOpen(true);
       } else {
         navigate("/onboarding");
@@ -70,12 +70,12 @@ export default function SignupPage() {
       alert(error.message);
     }
   };
-
+  
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
     navigate("/login");
   };
-
+  
   return (
     <>
       <FormContainer title="Create Account">
@@ -104,8 +104,8 @@ export default function SignupPage() {
         <FormControlLabel
           control={
             <Checkbox
-              checked
-              onChange={(e) => setRequestAdmin(e.target.value)}
+              checked={requestAdmin}
+              onChange={(e) => setRequestAdmin(e.target.checked)}
             />
           }
           label="Request Admin Access"

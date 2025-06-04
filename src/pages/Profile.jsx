@@ -33,8 +33,10 @@ import {
 import Navbar from "../components/NavBar";
 import { data } from "react-router-dom";
 import { useAuthContext } from "../services/userProvider";
+import CryptoJS from 'crypto-js';
+// Replace your Avatar line with:
 
-const schoolYears = ["9th Grade", "10th Grade", "11th Grade", "12th Grade"];
+const schoolYears = ["9th Grade", "10th Grade", "11th Grade", "12th Grade", "Other"];
 
 function Section({ title, children, onEdit }) {
   return (
@@ -278,6 +280,7 @@ const Profile = () => {
       </Box>
     );
   }
+  
 
   return (
     <>
@@ -306,14 +309,16 @@ const Profile = () => {
               alignItems: "center",
               gap: 2,
             }}
-          >
-            <Avatar sx={{ width: 80, height: 80 }} />
+          > 
+          <Avatar 
+            src={user?.photoURL || `https://www.gravatar.com/avatar/${CryptoJS.MD5((user?.email || '').toLowerCase().trim())}?s=80&d=wavatar`}
+            sx={{ width: 80, height: 80 }} 
+          />
             <Box>
               <Typography variant="h6" fontWeight="bold">
                 {studentData?.displayName || user?.displayName || "Student"}
               </Typography>
               <Typography>{studentData?.email || user?.email}</Typography>
-              <Typography>0 Following, 0 Followers</Typography>
             </Box>
           </Box>
           <Box sx={{ mt: 4, display: "flex", flexDirection: "column", gap: 3 }}>
