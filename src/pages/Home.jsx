@@ -64,7 +64,7 @@ const Home = () => {
   const [sortOption, setSortOption] = useState("Recent");
   const [search, setSearch] = useState("");
   const { user } = useAuthContext();
-
+  
   const fetchPosts = async () => {
     try {
       const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));

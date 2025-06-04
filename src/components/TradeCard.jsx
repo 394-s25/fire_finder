@@ -16,7 +16,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 export default function TradeCard({ data, savedTrades = [], setSavedTrades }) {
   const user = auth.currentUser;
   const isSaved = savedTrades.some((t) => t.id === data.id);
-
+  
   const toggleBookmark = async () => {
     if (!user) return;
     const studentRef = doc(db, "students", user.uid);

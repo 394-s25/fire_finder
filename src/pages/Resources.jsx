@@ -31,6 +31,8 @@ const Resources = () => {
   const [trades, setTrades] = useState([]);
   const [trainings, setTrainings] = useState([]);
   const [savedTrades, setSavedTrades] = useState([]);
+  const [savedTrainings, setSavedTrainings] = useState([]);
+  const [savedContacts, setSavedContacts] = useState([]);
 
   useEffect(() => {
     const fetchContacts = async () => {
@@ -78,8 +80,44 @@ const Resources = () => {
         console.error("Error fetching saved trades: ", error);
       }
     };
+    const fetchSavedTrainings = async () => {
+      try {
+        if (!user) return;
+        const studentDoc = await getDoc(doc(db, "students", user.uid));
+        if (!studentDoc.exists()) return;
+        const refs = studentDoc.data().trainings || [];
+        const trainings = await Promise.all(
+          refs.map(async (ref) => {
+            const snap = await getDoc(ref);
+            return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+          })
+        );
+        setSavedTrainings(trainings.filter(Boolean));
+      } catch (error) {
+        console.error("Error fetching saved trainings: ", error);
+      }
+    };
+    const fetchSavedContacts = async () => {
+      try {
+        if (!user) return;
+        const studentDoc = await getDoc(doc(db, "students", user.uid));
+        if (!studentDoc.exists()) return;
+        const refs = studentDoc.data().contacts || [];
+        const contacts = await Promise.all(
+          refs.map(async (ref) => {
+            const snap = await getDoc(ref);
+            return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+          })
+        );
+        setSavedContacts(contacts.filter(Boolean));
+      } catch (error) {
+        console.error("Error fetching saved contacts: ", error);
+      }
+    };
     fetchTrades();
     fetchSavedTrades();
+    fetchSavedTrainings();
+    fetchSavedContacts();
   }, [user]);
 
   useEffect(() => {
@@ -150,18 +188,11 @@ const Resources = () => {
               title="Training Resources"
               data={trainings}
               CardComponent={TrainingCard}
+              extraProps={{ savedTrainings, setSavedTrainings }}
             />
           </TabPanel>
 
           <TabPanel value={tab} index={1}>
-            {savedTrades.length > 0 && (
-              <ResourcesTab
-                title="Your Trades"
-                data={savedTrades}
-                CardComponent={TradeCard}
-                extraProps={{ savedTrades, setSavedTrades }}
-              />
-            )}
             <ResourcesTab
               title="Trade Information"
               data={trades}
@@ -175,6 +206,7 @@ const Resources = () => {
               title="Contacts"
               data={contacts}
               CardComponent={ContactCard}
+              extraProps={{ savedContacts, setSavedContacts }}
             />
           </TabPanel>
           <TabPanel value={tab} index={3}>
@@ -182,18 +214,30 @@ const Resources = () => {
                 <h1 style = {{fontWeight:"lighter"}}>My Resources</h1>
                 <Box>
                   <Accordion>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />} sx = {{backgroundColor:"rgba(0, 0, 0, 0.1)"}}>
-                  <Typography sx = {{fontSize:23, fontWeight:"500"}}>Trades</Typography>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />} sx = {{backgroundColor:"rgba(0, 0, 0, 0.1)"}}>
+                      <Typography sx = {{fontSize:23, fontWeight:"500"}}>Trades</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
+                      <ResourcesTab
+                        title="Your Saved Trades"
+                        data={savedTrades}
+                        CardComponent={TradeCard}
+                        extraProps={{ savedTrades, setSavedTrades }}
+                      />
                     </AccordionDetails>
                   </Accordion>
                   
                   <Accordion>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />} sx = {{backgroundColor:"rgba(0, 0, 0, 0.1)"}}>
-                  <Typography sx = {{fontSize:23, fontWeight:"500"}}>Trainings</Typography>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />} sx = {{backgroundColor:"rgba(0, 0, 0, 0.1)"}}>
+                      <Typography sx = {{fontSize:23, fontWeight:"500"}}>Trainings</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
+                      <ResourcesTab
+                        title="Your Saved Trainings"
+                        data={savedTrainings}
+                        CardComponent={TrainingCard}
+                        extraProps={{ savedTrainings, setSavedTrainings }}
+                      />
                     </AccordionDetails>
                   </Accordion>
                   
@@ -202,6 +246,12 @@ const Resources = () => {
                       <Typography sx = {{fontSize:23, fontWeight:"500"}}>Contacts</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
+                      <ResourcesTab
+                        title="Your Saved Contacts"
+                        data={savedContacts}
+                        CardComponent={ContactCard}
+                        extraProps={{ savedContacts, setSavedContacts }}
+                      />
                     </AccordionDetails>
                   </Accordion>
                 </Box>

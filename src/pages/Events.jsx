@@ -48,12 +48,14 @@ const Events = () => {
       setError(""); // Reset error
       try {
         let data = [];
+        const now = new Date();
 
         if (tab === 0) {
           const snapshot = await getDocs(collection(db, "events"));
           data = snapshot.docs.map((doc) => {
             const d = doc.data();
             return {
+              type: "allevents",
               id: doc.id,
               title: d.title,
               description: d.description,
@@ -63,12 +65,13 @@ const Events = () => {
               endDate: d.endDate?.toDate(),
               rsvp: d.rsvp || [], // Add this to provide RSVP count
             };
-          });
+          }).filter((event) => event.startDate && event.startDate > now);
         } else if (tab === 1) {
           // RSVP'd (Upcoming Events)
           data = await getUserRSVPedEvents();
           // Normalize data for EventCard
           data = data.map((event) => ({
+            type: "rsvpd",
             id: event.id,
             title: event.title,
             description: event.description,
@@ -81,6 +84,7 @@ const Events = () => {
           // Saved Events
           data = await getUserSavedEvents();
           data = data.map((event) => ({
+            type: "saved",
             id: event.id,
             title: event.title,
             description: event.description,
@@ -93,6 +97,7 @@ const Events = () => {
           // Past Events (Attended)
           data = await getUserPastAttendedEvents();
           data = data.map((event) => ({
+            type: "past",
             id: event.id,
             title: event.title,
             description: event.description,
@@ -152,7 +157,7 @@ const Events = () => {
       setSnackbarMsg("Error creating event.");
     }
   };
-
+  
   return (
     <>
       <Navbar />
@@ -231,6 +236,7 @@ const Events = () => {
                     />
                   ) : (
                     <EventCardStudent
+                      type={event.type}
                       id={event.id}
                       title={event.title}
                       description={event.description}
@@ -242,6 +248,7 @@ const Events = () => {
                   )
                 ) : (
                   <EventCardStudent
+                    type={event.type}
                     id={event.id}
                     title={event.title}
                     description={event.description}
