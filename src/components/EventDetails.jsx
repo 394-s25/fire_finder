@@ -3,6 +3,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CloseIcon from "@mui/icons-material/Close";
 import TodayIcon from '@mui/icons-material/Today';
 
+//made edits
 const EventDetails = ({
     open,
     onClose,
