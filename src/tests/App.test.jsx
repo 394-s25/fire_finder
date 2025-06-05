@@ -4,7 +4,7 @@ import App from "../App";
 import { UserProvider } from "../services/userProvider";
 import "@testing-library/jest-dom";
 
-vi.mock("./services/userProvider", () => ({
+vi.mock("../services/userProvider", () => ({
   useAuthContext: () => ({
     user: {
       uid: "test-user",
