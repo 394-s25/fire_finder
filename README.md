@@ -88,6 +88,17 @@ To get a local copy up and running follow these simple example steps.
    firebase deploy
    ```
 
+### Next Steps
+
+1. Differentiate admin permissions between Trade Collective admins and partner employers.
+
+
+    - Trade collective employees should have full superuser permissions over the site.
+    - Partner employers should be able to publish events and content and view analytics for the content on the site that pertains to them.
+
+2. Implement additional analytics on the admin page.
+3. Generate "For You" content on the home page based on student interests.
+
 [contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
 [contributors-url]: https://github.com/github_username/repo_name/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge
