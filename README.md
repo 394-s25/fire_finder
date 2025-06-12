@@ -25,7 +25,12 @@
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
+        <li><a href="#running-locally">Running Locally</a></li>
+        <li><a href="#deployment">Deployment</a></li>
       </ul>
+    </li>
+    <li>
+      <a href="#next-steps">Next Steps</a>
     </li>
   </ol>
 </details>
@@ -36,16 +41,19 @@ Allows student to:
 
 - Share social posts
 - RSVP to events
-- Access resources
+- Access resources about careers in the trades
+
+Allows Trade Collective Employees to:
+
+- Coordinate events
+- Publish content for students
+- View analytics
 
 ## Built With
 
 [![React][React.js]][React-url]
 
 ## Getting Started
-
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
@@ -88,13 +96,12 @@ To get a local copy up and running follow these simple example steps.
    firebase deploy
    ```
 
-### Next Steps
+## Next Steps
 
 1. Differentiate admin permissions between Trade Collective admins and partner employers.
 
-
-    - Trade collective employees should have full superuser permissions over the site.
-    - Partner employers should be able to publish events and content and view analytics for the content on the site that pertains to them.
+   - Trade collective employees should have full superuser permissions over the site.
+   - Partner employers should be able to publish events and content and view analytics for the content on the site that pertains to them.
 
 2. Implement additional analytics on the admin page.
 3. Generate "For You" content on the home page based on student interests.
