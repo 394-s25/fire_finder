@@ -1,9 +1,16 @@
 import "@testing-library/jest-dom";
 import PollModal from "../components/PollModal";
-
-vi.mock("../services/firestoreConfig", () => ({
-  db: "mocked-db",
-}));
+import { render, screen, within, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  getFirestore,
+} from "firebase/firestore";
+import { useAuthContext } from "../services/userProvider";
+import { describe } from "vitest";
+import { duration } from "@mui/material";
 
 vi.mock("firebase/firestore", () => ({
   getFirestore: vi.fn(() => "mocked-db"),
