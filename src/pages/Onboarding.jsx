@@ -112,12 +112,14 @@ export default function OnboardingForm() {
       alert(error.message);
     }
   };
-
+  
   return (
     <FormContainer title="Tell Us About You">
       <FormControl fullWidth margin="normal">
-        <InputLabel>Trade Interests</InputLabel>
+        <InputLabel id="trade-interests-label">Trade Interests</InputLabel>
         <Select
+          labelId="trade-interests-label"
+          id="trade-interests"
           multiple
           value={interests}
           onChange={(e) => setInterests(e.target.value)}
@@ -138,10 +140,12 @@ export default function OnboardingForm() {
           ))}
         </Select>
       </FormControl>
-
+      
       <FormControl fullWidth margin="normal">
-        <InputLabel>Current School Year</InputLabel>
+        <InputLabel id = "school-year-label">Current School Year</InputLabel>
         <Select
+          labelId="school-year-label"
+          id="school-year"
           value={year}
           onChange={(e) => setYear(e.target.value)}
           label="Current School Year"
@@ -275,7 +279,7 @@ export default function OnboardingForm() {
           />
         )}
       />
-
+      
       <Button
         fullWidth
         variant="contained"

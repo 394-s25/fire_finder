@@ -145,7 +145,7 @@ const EventCardStudent = ({
   if (!image) {
     image = banner;
   }
-
+  
   return (
     <>
       <Card className="mb-6 rounded-lg overflow-hidden">
